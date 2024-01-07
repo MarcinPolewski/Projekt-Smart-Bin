@@ -4,6 +4,17 @@
             <h4>Dodaj użytkownika</h4>
             <input type="email" placeholder="email" v-model="currentUserMail"/>
             <input type="text" placeholder="name" v-model="currentUserName"/>
+            <select>
+                <option selected hidden disabled>Jak często chcesz otrzymywać statystyki na email?</option>
+                <option>Codziennie</option>
+                <option>Co tydzień</option>
+                <option>Co miesiąc</option>
+                <option>Co trzy miesiące</option>
+            </select>
+            <select>
+                <option selected hidden disabled>Który kosz wynosisz?</option>
+                <option>Kosz pod zlewem</option>
+            </select>
             <input type="button" value="Potwierdź" @click="addUser"/>
             <p>Oto lista stworzonych użytkowników:</p>
             <ul>
@@ -25,7 +36,7 @@ export default
 
         const addUser = () =>
         {
-            let newUser = 
+            let newUser =
             {
                 name: currentUserName.value,
                 mail: currentUserMail.value
@@ -40,7 +51,7 @@ export default
 </script>
 <style scoped lang="scss">
 @import '../style/style.scss';
-    #main 
+    #main
     {
         width: 100%;
         min-height: 80vh;
@@ -53,12 +64,12 @@ export default
             display: flex;
             flex-direction: column;
 
-            & h4, input
+            & h4, input, select
             {
                 margin-top: 5%;
             }
 
-            & p 
+            & p
             {
                 margin-top: 10%;
             }
