@@ -106,14 +106,14 @@ def scheduleApi(request, id=0):
         return JsonResponse("failed to add", safe=False)
     elif request.method=="PUT":
         user_data=JSONParser().parse(request)
-        user=TblHarmonogramWyn.objects.get(id_log=user_data['id_daty'])
+        user=TblHarmonogramWyn.objects.get(id_daty=user_data['id_daty'])
         user_serializer =TblHarmonogramWynSerializer(user, data=user_data)
         if user_serializer.is_valid():
             user_serializer.save()
             return JsonResponse("Updated succseful", safe=False)
         return JsonResponse("update failed", safe=False)
     elif request.method=='DELETE':
-        user= TblHarmonogramWyn.objects.get(id_log=id)
+        user= TblHarmonogramWyn.objects.get(id_daty=id)
         user.delete()
         return JsonResponse("deleted succesfully", safe=False)
 
@@ -121,11 +121,12 @@ def scheduleApi(request, id=0):
 @csrf_exempt
 def takeoutApi(request, id=0):
     if request.method =="GET":
-        user = TblWynoszenie.objects.all()
-        user_serializer = TblWynoszenieSerializer(user, many=True)
-        return JsonResponse(user_serializer.data,safe=False)
+        takeout = TblWynoszenie.objects.all()
+        takeout_serializer = TblWynoszenieSerializer(takeout, many=True)
+        return JsonResponse(takeout_serializer.data,safe=False)
     elif request.method == "POST":
         user_data=JSONParser().parse(request)
+        print(user_data)
         user_serializer = TblWynoszenieSerializer(data=user_data)
         if user_serializer.is_valid():
             user_serializer.save()

@@ -24,6 +24,6 @@ class TblHarmonogramWynSerializer(serializers.ModelSerializer):
 
 
 class TblWynoszenieSerializer(serializers.ModelSerializer):
-     class Meta:
-        model = TblWynoszenie
+    class Meta:
+        model=TblWynoszenie
         fields = '__all__'

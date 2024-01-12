@@ -8,16 +8,6 @@
 from django.db import models
 
 
-class DjangoMigrations(models.Model):
-    app = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    applied = models.DateTimeField()
-
-    class Meta:
-        managed = False
-        db_table = 'django_migrations'
-
-
 class TblBinLogs(models.Model):
     id_log = models.AutoField(unique=True, primary_key=True)
     date_log = models.TextField()
@@ -66,7 +56,7 @@ class TblUzytkownicyKonfig(models.Model):
 
 
 class TblWynoszenie(models.Model):
-    id_empty = models.AutoField(unique=True, primary_key=True)
+    id_empty = models.IntegerField(unique=True, primary_key=True)
     which_bin_field = models.IntegerField(db_column='which_bin ')  # Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
     who_should = models.IntegerField()
     who_did = models.IntegerField()
