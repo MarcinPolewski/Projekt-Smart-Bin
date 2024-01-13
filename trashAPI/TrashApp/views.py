@@ -4,6 +4,7 @@ from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
 from TrashApp.models import *
 from TrashApp.serializers import *
+from rest_framework.viewsets import ModelViewSet
 # Create your views here.
 
 
@@ -144,6 +145,31 @@ def takeoutApi(request, id=0):
         user= TblWynoszenie.objects.get(id_empty=id)
         user.delete()
         return JsonResponse("deleted succesfully", safe=False)
+
+
+
+class UserViewSet(ModelViewSet):
+    serializer_class=TblUzytkownicyKonfigSerializer
+    queryset=TblUzytkownicyKonfig.objects.all()
+
+
+
+class BinViewSet(ModelViewSet):
+    serializer_class=TblKoszeKonfiguracyjnaSerializer
+    queryset=TblKoszeKonfiguracyjna.objects.all()
+
+
+class LogsViewSet(ModelViewSet):
+    serializer_class=TblBinLogsSerializer
+    queryset=TblBinLogs.objects.all()
+
+class TakeoutViewSet(ModelViewSet):
+    serializer_class=TblWynoszenieSerializer
+    queryset=TblWynoszenie.objects.all()
+
+class ScheduleViewSet(ModelViewSet):
+    serializer_class=TblHarmonogramWynSerializer
+    queryset=TblHarmonogramWyn.objects.all()
 
 
 
