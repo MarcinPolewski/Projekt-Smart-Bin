@@ -10,9 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='tblwynoszenie',
-            name='which_bin_field',
-            field=models.IntegerField(db_column='which_bin '),
-        ),
+
     ]

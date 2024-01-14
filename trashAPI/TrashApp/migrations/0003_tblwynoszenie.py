@@ -10,19 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='TblWynoszenie',
-            fields=[
-                ('id_empty', models.AutoField(primary_key=True, serialize=False, unique=True)),
-                ('which_bin_field', models.IntegerField(db_column='which_bin_')),
-                ('who_should', models.IntegerField()),
-                ('who_did', models.IntegerField()),
-                ('date', models.TextField()),
-                ('add_points', models.IntegerField(blank=True, null=True)),
-                ('sub_points', models.IntegerField(blank=True, null=True)),
-            ],
-            options={
-                'db_table': 'tbl_wynoszenie',
-            },
-        ),
+
     ]

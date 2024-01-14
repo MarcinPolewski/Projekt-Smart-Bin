@@ -135,7 +135,4 @@ class Migration(migrations.Migration):
                 'managed': False,
             },
         ),
-        migrations.DeleteModel(
-            name='TblWynoszenie',
-        ),
     ]
