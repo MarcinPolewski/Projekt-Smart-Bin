@@ -5,11 +5,11 @@
             <input type="email" placeholder="email" v-model="currentUserMail"/>
             <input type="text" placeholder="name" v-model="currentUserName"/>
             <select v-model="statistics">
-                <option selected hidden disabled :value="0">Jak często chcesz otrzymywać statystyki na email?</option>
-                <option :value="1">Codziennie</option>
-                <option :value="7">Co tydzień</option>
-                <option :value="30">Co miesiąc</option>
-                <option :value="90">Co trzy miesiące</option>
+                <option selected hidden disabled value="">Jak często chcesz otrzymywać statystyki na email?</option>
+                <option value="1">Codziennie</option>
+                <option value="7">Co tydzień</option>
+                <option value="30">Co miesiąc</option>
+                <option value="90">Co trzy miesiące</option>
             </select>
             <select>
                 <option selected hidden disabled>Który kosz wynosisz?</option>
@@ -18,8 +18,8 @@
 
             <h2>{{ warning_error }}</h2>
 
-            <input type="button" value="Potwierdź" @click="addUser"/>
-            <p>Oto lista stworzonych użytkowników:</p>
+            <input type="button" id="confirm" value="Potwierdź" @click="addUser"/>
+            <h4>Oto lista stworzonych użytkowników:</h4>
             <ul>
                 <li v-for="user in userList" :key="user">{{ user.user_name }}, {{ user.user_mail }}</li>
             </ul>
@@ -39,7 +39,7 @@ export default
         var userList = ref([])
         var currentUserMail = ref()
         var currentUserName = ref()
-        var statistics = ref()
+        var statistics = ref("")
         var warning_error = ref("")
 
         const addUser = async () =>
@@ -82,13 +82,10 @@ export default
                     userList.value.push(user);
                 });
                 console.log(userList.value)
-
-                warning_error.value = "Poprawnie dodano użytkownika"
             }
             catch (error)
             {
                 console.error(error);
-                warning_error.value = "Błędne dane"
             }
         }
         refreshUsers()
@@ -141,9 +138,19 @@ export default
         display: flex;
         justify-content: center;
 
+        #confirm
+        {
+            transition: 0.3s ease-in-out;
+        }
+        #confirm:hover
+        {
+            color: white;
+            background-color: $main-color2;
+        }
+
         &-form
         {
-            width: 50%;
+            width: 90%;
             display: flex;
             flex-direction: column;
 
@@ -152,9 +159,79 @@ export default
                 margin-top: 5%;
             }
 
+            input, select
+            {
+                border: 1px solid $main-color;
+                line-height: 3rem;
+                height: 3rem;
+                background-color: white;
+                color: $main-color2;
+            }
+
             & p
             {
                 margin-top: 10%;
+            }
+        }
+
+        ul
+        {
+            padding: 0;
+        }
+
+        li
+        {
+            list-style-type: none;
+            line-height: 2rem;
+            width: 100%;
+            background-color: white;
+            text-align: center;
+            margin-bottom: 1%;
+        }
+    }
+    @media only screen and (min-width: 1000px)
+    {
+        #main
+        {
+            width: 100%;
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+
+            &-form
+            {
+                width: 50%;
+                display: flex;
+                flex-direction: column;
+
+                & h4, input, select
+                {
+                    margin-top: 5%;
+                }
+
+                input, select
+                {
+                    border: 1px solid $main-color;
+                    line-height: 3rem;
+                    height: 3rem;
+                    background-color: white;
+                    color: $main-color2;
+                }
+
+                & p
+                {
+                    margin-top: 10%;
+                }
+            }
+
+            li
+            {
+                list-style-type: none;
+                line-height: 2rem;
+                width: 100%;
+                background-color: white;
+                text-align: center;
+                margin-bottom: 1%;
             }
         }
     }

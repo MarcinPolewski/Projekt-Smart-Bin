@@ -3,7 +3,8 @@
         <div id="container">
             <div id="img-div">
                 <img src="../assets/kosz.png">
-                <p>{nazwa kosza}</p>
+                <p>{{ binName }} ({{ binDepth }}cm)</p>
+                <p>Wypełniony w {}%</p>
             </div>
             <div id="info">
                 <div id="info-graphic">
@@ -12,7 +13,7 @@
                             Teraz
                         </a>
                         <a class="green-text">
-                            {Kasia}
+                            {}{{ whoNow }}
                         </a>
                     </div>
                     <div class="info-graphics">
@@ -20,24 +21,59 @@
                             Później
                         </a>
                         <a class="green-text">
-                            {Martyna}
+                            {}{{ whoNext }}
                         </a>
                     </div>
                 </div>
                 <div id="info-description">
                     <h2>Uwaga!</h2>
-                    <a>Kosz nie został wyniesiony od {48h}</a>
-                    <a>Dostaniesz {20} pkt za wyniesienie</a>
-                    <a>Za każde {12h} zabierzemy ci {10} pkt</a>
+                    <a>Kosz nie został wyniesiony od {} {{ whenEmptied }}h</a>
+                    <a>Dostaniesz {{ pointsToAdd }} pkt za wyniesienie</a>
+                    <a>Za każde 12h zabierzemy ci {{ pointsToRemove }} pkt</a>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script>
+import { inject, ref } from 'vue';
+import axios from "axios";
+
 export default
 {
+    setup()
+    {
+        const endpoint = inject("g_endpoint")
+        var binName = ref("")
+        var binDepth = ref("")
+        var pointsToAdd = ref("")
+        var pointsToRemove = ref("")
+        var whenEmptied = ref("")
+        var whoNow = ref("")
+        var whoNext = ref("")
 
+        const fetchBinName = async () =>
+        {
+            try
+            {
+                const response = await axios
+                .get(`${endpoint}bins/1/`)
+
+                binName.value = response.data.bin_name
+                binDepth.value = response.data.bin_depth
+                pointsToAdd.value = response.data.adding_points
+                pointsToRemove.value = response.data.subtrack_points
+            }
+            catch(error)
+            {
+                console.log(error)
+            }
+        }
+
+        fetchBinName()
+
+        return {binName, binDepth, pointsToAdd, pointsToRemove, whenEmptied, whoNext, whoNow}
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -72,6 +108,7 @@ export default
                     margin-top: 5%;
                     font-weight: bold;
                     font-size: 2rem;
+                    text-align: center;
                 }
             }
 

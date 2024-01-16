@@ -1,15 +1,45 @@
 <template>
     <div id="main">
-        <h4>User1 ma 100 pkt</h4>
-        <h4>User2 ma 121 pkt</h4>
-        <h4>User3 ma 23 pkt</h4>
-        <h4>User4 ma 56 pkt</h4>
+        <div class="points" v-for="user in userList" :key="user">
+            <h2>{{user.user_name}}</h2>
+            <a>{}pkt</a>
+        </div>
     </div>
 </template>
 <script>
+import { inject, ref } from 'vue';
+import axios from "axios";
+
 export default
 {
-    
+    setup()
+    {
+        const endpoint = inject("g_endpoint")
+
+        var userList = ref([])
+
+        const refreshUsers = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${endpoint}users/`);
+                const responseData = response.data;
+
+                responseData.forEach((user) =>
+                {
+                    userList.value.push(user);
+                });
+                console.log(userList.value)
+            }
+            catch (error)
+            {
+                console.error(error);
+            }
+        }
+        refreshUsers()
+
+        return {userList}
+    }
 }
 </script>
 <style scoped lang="scss">
@@ -17,5 +47,51 @@ export default
     {
         min-height: 80vh;
         width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+
+        .points
+        {
+            background-color: white;
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            height: 50vh;
+            margin-top: 5%;
+
+            h2
+            {
+                word-break: break-all;
+                text-align: center;
+            }
+        }
+    }
+
+    @media only screen and (min-width: 1000px)
+    {
+        #main
+        {
+            min-height: 80vh;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            margin-bottom: 5%;
+
+            .points
+            {
+                background-color: white;
+                width: 19%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-evenly;
+                height: 50vh;
+                margin-top: 5%;
+            }
+        }
     }
 </style>

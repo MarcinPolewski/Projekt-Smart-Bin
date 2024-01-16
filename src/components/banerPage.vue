@@ -8,7 +8,7 @@
             <router-link to="/add-user" class="menu">Dodaj Użytkownika</router-link>
             <router-link to="/assign-user" class="menu">Przypisz Użytkownika</router-link>
             <router-link to="/punctation" class="menu">Punktacja</router-link>
-            <router-link to="/filling-level" class="menu">Zapełnienie Kosza</router-link>
+            <!-- <router-link to="/filling-level" class="menu">Zapełnienie Kosza</router-link> -->
         </div>
     </div>
 </template>
@@ -70,6 +70,7 @@ export default
             align-items: center;
             width: 60%;
             height: 100%;
+            margin-top: 7%;
 
             .button
             {
@@ -85,11 +86,16 @@ export default
                 text-decoration: none;
                 background-color: white;
                 color: $main-color;
-                font-weight: bold;
                 width: 75%;
                 text-align: center;
                 padding: 10px;
                 cursor: pointer;
+                transition: 0.3s ease-in-out;
+                &:hover
+                {
+                    color: white;
+                    background-color: $main-color2;
+                }
             }
         }
     }
@@ -120,6 +126,7 @@ export default
                 align-items: center;
                 width: 60%;
                 height: 100%;
+                margin-top: 0;
 
                 .button
                 {
@@ -135,10 +142,10 @@ export default
                     text-decoration: none;
                     background-color: white;
                     color: $main-color;
-                    width: 20%;
-                    font-weight: bold;
+                    width: 30%;
                     padding: 10px;
                     cursor: pointer;
+                    white-space: nowrap;
                 }
             }
         }

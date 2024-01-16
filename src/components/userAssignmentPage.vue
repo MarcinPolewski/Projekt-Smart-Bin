@@ -1,7 +1,8 @@
 <template>
     <div id="main">
         <div id="top">
-            <a>Teraz konfigurujesz: Kosz pod zlewem</a>
+            <h1>Przypisz użytkownika</h1>
+            <h2>Teraz konfigurujesz: Kosz pod zlewem</h2>
         </div>
         <div id="center">
             <div id="main-assign">
@@ -19,7 +20,7 @@
                 <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
             </div>
             <div id="main-current">
-                <h4>Przypisani użytkownicy:</h4>
+                <p>Przypisani użytkownicy:</p>
                 <ul>
                     <li v-for="user in selectedUsers" :key="index">{{ user }}</li>
                 </ul>
@@ -35,6 +36,7 @@
                 <option>Kasia</option>
                 <option>Tomek</option>
             </select>
+            <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
         </div>
         <div id="konfiguracja">
             <h2>Pozostałe ustawienia</h2>
@@ -50,6 +52,7 @@
                 Punkty odbierane za każde 12h niewyniesienia kosza
                 <input type="number" min="0"/>
             </label>
+            <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
         </div>
     </div>
 </template>
@@ -89,6 +92,7 @@ export default
 }
 </script>
 <style scoped lang="scss">
+@import '../style/style.scss';
     #main
     {
         width: 100%;
@@ -97,22 +101,48 @@ export default
         flex-direction: column;
         align-items: center;
 
+        #confirm
+        {
+            transition: 0.3s ease-in-out;
+        }
+        #confirm:hover
+        {
+            color: white;
+            background-color: $main-color2;
+        }
+
+        input, select
+        {
+            border: 1px solid $main-color;
+            line-height: 3rem;
+            height: 3rem;
+            background-color: white;
+            color: $main-color2;
+        }
+
         #top
         {
             margin-top: 5%;
-            width: 20%;
+            width: 100%;
+            text-align: center;
         }
 
         #center
         {
             margin-top: 5%;
-            width: 50%;
+            width: 90%;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: space-around;
 
             div
             {
-                width: 25%;
+                width: 100%;
+
+                p
+                {
+                    font-size: 1.5rem;
+                }
             }
 
             #main-assign, #main-remove
@@ -122,7 +152,26 @@ export default
 
                 & #confirm
                 {
-                    margin-top: 20%;
+                    margin-top: 10%;
+                    margin-bottom: 10%;
+                }
+            }
+
+            #main-current
+            {
+                ul
+                {
+                    padding: 0;
+                }
+
+                li
+                {
+                    list-style-type: none;
+                    line-height: 2rem;
+                    width: 100%;
+                    background-color: white;
+                    text-align: center;
+                    margin-bottom: 1%;
                 }
             }
         }
@@ -130,15 +179,176 @@ export default
         #harmonogram
         {
             margin-top: 5%;
+            width: 90%;
             display: flex;
             flex-direction: column;
+            text-align: center;
+
+            & #confirm
+            {
+                margin-top: 10%;
+                margin-bottom: 10%;
+            }
+
+            label
+            {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 5%;
+            }
         }
 
         #konfiguracja
         {
             margin-top: 5%;
+            width: 90%;
             display: flex;
             flex-direction: column;
+
+            & #confirm
+            {
+                margin-top: 10%;
+                margin-bottom: 10%;
+            }
+
+            label
+            {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 5%;
+
+                input
+                {
+                    margin-left: 5%;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 1000px)
+    {
+        #main
+        {
+            width: 100%;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            input, select
+            {
+                border: 1px solid $main-color;
+                line-height: 3rem;
+                height: 3rem;
+                background-color: white;
+                color: $main-color2;
+            }
+
+            #top
+            {
+                margin-top: 5%;
+                width: 100%;
+                text-align: center;
+            }
+
+            #center
+            {
+                margin-top: 5%;
+                width: 33%;
+                display: flex;
+                flex-direction: column;
+                align-items: space-around;
+
+                div
+                {
+                    width: 100%;
+
+                    p
+                    {
+                        font-size: 1.5rem;
+                    }
+                }
+
+                #main-assign, #main-remove
+                {
+                    display: flex;
+                    flex-direction: column;
+
+                    & #confirm
+                    {
+                        margin-top: 10%;
+                        margin-bottom: 10%;
+                    }
+                }
+
+                #main-current
+                {
+                    ul
+                    {
+                        padding: 0;
+                    }
+
+                    li
+                    {
+                        list-style-type: none;
+                        line-height: 2rem;
+                        width: 100%;
+                        background-color: white;
+                        text-align: center;
+                        margin-bottom: 1%;
+                    }
+                }
+            }
+
+            #harmonogram
+            {
+                margin-top: 5%;
+                width: 33%;
+                display: flex;
+                flex-direction: column;
+                text-align: center;
+
+                & #confirm
+                {
+                    margin-top: 10%;
+                    margin-bottom: 10%;
+                }
+
+                label
+                {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 5%;
+                }
+            }
+
+            #konfiguracja
+            {
+                margin-top: 5%;
+                width: 50%;
+                display: flex;
+                flex-direction: column;
+
+                & #confirm
+                {
+                    margin-top: 10%;
+                    margin-bottom: 10%;
+                }
+
+                label
+                {
+                    width: 100%;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 5%;
+                }
+            }
         }
     }
 </style>
