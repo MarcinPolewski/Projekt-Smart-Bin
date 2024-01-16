@@ -6,7 +6,7 @@
 <script>
 export default
 {
-    
+
 }
 </script>
 <style scoped lang="scss">
@@ -19,5 +19,11 @@ export default
         display: flex;
         justify-content: center;
         align-items: center;
+
+        a
+        {
+            color: $main-color2;
+            text-align: center;
+        }
     }
 </style>
