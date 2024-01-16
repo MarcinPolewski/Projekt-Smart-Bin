@@ -37,6 +37,7 @@ class TblKoszeKonfiguracyjna(models.Model):
     emp_reminder = models.IntegerField()
     adding_points = models.IntegerField()
     subtrack_points = models.IntegerField()
+    bin_status = models.TextField()  # This field type is a guess.
 
     class Meta:
         managed = False
@@ -48,7 +49,8 @@ class TblUzytkownicyKonfig(models.Model):
     user_name = models.TextField(unique=True)
     user_mail = models.TextField()
     statistics_days = models.IntegerField()
-    which_bin = models.IntegerField()
+    which_bin = models.TextField()
+    points_status = models.IntegerField()
 
     class Meta:
         managed = False
@@ -57,7 +59,7 @@ class TblUzytkownicyKonfig(models.Model):
 
 class TblWynoszenie(models.Model):
     id_empty = models.IntegerField(unique=True, primary_key=True)
-    which_bin_field = models.IntegerField(db_column='which_bin ')  # Field renamed to remove unsuitable characters. Field renamed because it ended with '_'.
+    which_bin = models.IntegerField()
     who_should = models.IntegerField()
     who_did = models.IntegerField()
     date = models.TextField()

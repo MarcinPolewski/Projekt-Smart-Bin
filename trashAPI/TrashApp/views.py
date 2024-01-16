@@ -5,6 +5,8 @@ from django.http.response import JsonResponse
 from TrashApp.models import *
 from TrashApp.serializers import *
 from rest_framework.viewsets import ModelViewSet
+from django.forms.models import model_to_dict
+import json
 # Create your views here.
 
 
@@ -126,11 +128,26 @@ def takeoutApi(request, id=0):
         takeout_serializer = TblWynoszenieSerializer(takeout, many=True)
         return JsonResponse(takeout_serializer.data,safe=False)
     elif request.method == "POST":
-        user_data=JSONParser().parse(request)
+        takeout_data=JSONParser().parse(request)
+        takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
+        add_points = takeout_data.get('add_points')
+        who_did = TblUzytkownicyKonfig.objects.get(id_user=takeout_data['who_should'])
+        user_serializer = TblUzytkownicyKonfigSerializer(who_did)
+        user_data=user_serializer.data
         print(user_data)
-        user_serializer = TblWynoszenieSerializer(data=user_data)
-        if user_serializer.is_valid():
-            user_serializer.save()
+        current_user_points = user_data['points_status']
+        print(current_user_points)
+        current_user_points += add_points
+        user_data.update({"points_status": current_user_points})
+        print(user_data)
+        user_serializer_new = TblUzytkownicyKonfigSerializer(who_did, data = user_data)
+        takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
+        print(takeout_data)
+        if takeout_serializer.is_valid():
+            takeout_serializer.save()
+        print(takeout_serializer.errors)
+        if user_serializer_new.is_valid():
+            user_serializer_new.save()
             return JsonResponse("Added succesfully",safe=False)
         return JsonResponse("failed to add", safe=False)
     elif request.method=="PUT":
