@@ -130,6 +130,7 @@ def takeoutApi(request, id=0):
     elif request.method == "POST":
         takeout_data=JSONParser().parse(request)
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
+        print(takeout_data)
         add_points = takeout_data.get('add_points')
         who_did = TblUzytkownicyKonfig.objects.get(id_user=takeout_data['who_should'])
         user_serializer = TblUzytkownicyKonfigSerializer(who_did)
@@ -143,9 +144,10 @@ def takeoutApi(request, id=0):
         user_serializer_new = TblUzytkownicyKonfigSerializer(who_did, data = user_data)
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
         print(takeout_data)
+        print(takeout_serializer.data)
         if takeout_serializer.is_valid():
             takeout_serializer.save()
-        print(takeout_serializer.errors)
+        print(takeout_serializer.data)
         if user_serializer_new.is_valid():
             user_serializer_new.save()
             return JsonResponse("Added succesfully",safe=False)

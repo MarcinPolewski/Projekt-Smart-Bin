@@ -58,7 +58,7 @@ class TblUzytkownicyKonfig(models.Model):
 
 
 class TblWynoszenie(models.Model):
-    id_empty = models.IntegerField(unique=True, primary_key=True)
+    id_empty = models.AutoField(unique=True, primary_key=True)
     which_bin = models.IntegerField()
     who_should = models.IntegerField()
     who_did = models.IntegerField()
