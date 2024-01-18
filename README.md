@@ -1,16 +1,16 @@
 # smieci
 
-## setup projektu
+## Setup projektu
 ```
 npm install
 ```
 
-### tryb developerski (tego używamy przy tworzeniu)
+### Tryb developerski (tego używamy przy tworzeniu)
 ```
 npm run serve
 ```
 
-### build (to będzie stało na serwerze)
+### Duild (to będzie stało na serwerze)
 ```
 npm run build
 ```
@@ -21,7 +21,7 @@ npm run build
 
 ### Wprowadzenie
 
-Frontend naszej aplikacji został w pełni zrealizowany przy użyciu reaktywnego frameworku do JavaScripta - Vue.js. To zaawansowane narzędzie umożliwia tworzenie dynamicznych i interaktywnych interfejsów użytkownika. Nasza strona internetowa jest zoptymalizowana jako interfejs do obsługi naszego REST API, co pozwala na efektywną komunikację z serwerem.
+Frontend naszej aplikacji został w pełni zrealizowany przy użyciu reaktywnego frameworku do JavaScripta - Vue.js. To zaawansowane narzędzie umożliwia tworzenie dynamicznych i interaktywnych interfejsów użytkownika. Nasza strona internetowa jest zoptymalizowana jako interfejs do obsługi naszego REST API, co pozwala na efektywną komunikację z serwerem. Strona jest responsywna - dostosowuje się zarówno do wielkości monitora komputera, jak i ekranu telefonu.
 
 ### Struktura Projektu
 
