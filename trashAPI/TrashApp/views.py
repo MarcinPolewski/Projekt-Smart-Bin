@@ -156,7 +156,7 @@ def takeoutApi(request, id=0):
             pass
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
         current_date = datetime.now()
-        date_string = current_date.strftime("%d-%m-%Y %H:%M")
+        date_string = current_date.strftime("%d-%m-%Y %H:%:%S")
         takeout_data.update({"date": date_string})
         add_points = int(takeout_data.get("add_points"))
         add_points_user = TblUzytkownicyKonfig.objects.get(
