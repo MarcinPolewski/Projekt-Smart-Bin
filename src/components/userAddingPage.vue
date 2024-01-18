@@ -59,7 +59,7 @@ export default
                     user_mail: currentUserMail.value,
                     statistics_days: statistics.value,
                     which_bin: 0,
-                    points_status: 69
+                    points_status: 0
                 }
                 let dataJ = JSON.stringify(data)
                 await axios
