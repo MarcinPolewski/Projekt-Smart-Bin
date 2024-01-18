@@ -85,6 +85,14 @@ def logsApi(request, id=0):
         date_string = current_date.strftime("%d-%m-%Y %H:%M")
         user_data.update({"date_log": date_string})
         user_serializer = TblBinLogsSerializer(data=user_data)
+        new_bin_status = user_data["bin_status"]
+        bin = TblKoszeKonfiguracyjna.objects.get(id_bin=user_data["bin_id"])
+        bin_serializer = TblKoszeKonfiguracyjnaSerializer(bin)
+        bin_data = bin_serializer.data
+        bin_data.update({"bin_status": new_bin_status})
+        bin_serializer = TblKoszeKonfiguracyjnaSerializer(bin, bin_data)
+        if bin_serializer.is_valid():
+            bin_serializer.save()
         if user_serializer.is_valid():
             user_serializer.save()
             return JsonResponse("Added succesfully", safe=False)
