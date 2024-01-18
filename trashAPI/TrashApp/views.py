@@ -7,6 +7,7 @@ from TrashApp.serializers import *
 from rest_framework.viewsets import ModelViewSet
 from django.forms.models import model_to_dict
 import json
+from datetime import datetime
 import urllib.parse
 
 # Create your views here.
@@ -129,6 +130,7 @@ def takeoutApi(request, id=0):
     elif request.method == "POST":
         try:
             takeout_data = JSONParser().parse(request)
+            print(takeout_data)
         except Exception:
             reuquest_without_b = str(request.body).strip("b'")
             request_decoded = urllib.parse.parse_qs(reuquest_without_b)
@@ -136,6 +138,9 @@ def takeoutApi(request, id=0):
             for field in takeout_data:
                 takeout_data.update({field: takeout_data.get(field)[0]})
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
+        current_date = datetime.now()
+        date_string = current_date.strftime("%d-%m-%Y %H:%M")
+        takeout_data.update({"date": date_string})
         add_points = int(takeout_data.get("add_points"))
         add_points_user = TblUzytkownicyKonfig.objects.get(
             id_user=takeout_data["who_did"]
@@ -169,7 +174,6 @@ def takeoutApi(request, id=0):
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
         if takeout_serializer.is_valid():
             takeout_serializer.save()
-
         if user_serializer_new.is_valid():
             user_serializer_new.save()
             return JsonResponse("Added succesfully", safe=False)
