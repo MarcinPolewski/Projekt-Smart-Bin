@@ -50,3 +50,16 @@ Frontend został zbudowany przy użyciu Vue.js w wersji 3.3.12. Wykorzystanie na
 ### Rozbudowa Projektu
 
 Całość została stworzona z myślą o łatwej rozbudowie w przyszłości. Modułowa struktura projektu i zastosowanie Vue.js jako frameworka reaktywnego ułatwiają dodawanie nowych funkcji i komponentów.
+
+## Backend
+
+### Wprowadzenie
+Backend został zrobiony w django rest framework. Pozwala nam na komunikację pomiędzy bazą danych, płytką i stroną. Udostępnia dane w formacie JSON.
+
+### Struktura Plików
+Najważniejsze pliki w projekcie to 
+models.py - plik w którym znajdują się klasy odpowiadające tabelom z bazy danych.
+serializers.py - plik w którym znajdują się serializatory danych z modeli
+views.py - plik w którym wykorzystywane są modele i serializatory do obsługi zapytań do api i logiki
+
+ 
