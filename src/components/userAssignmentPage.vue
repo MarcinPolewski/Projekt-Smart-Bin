@@ -51,7 +51,7 @@
                 <input type="number" min="0" v-model="pointsToAdd"/>
             </label>
             <label>
-                Punkty odbierane za każde 12h niewyniesienia kosza
+                Punkty odbierane za niewyniesienie kosza
                 <input type="number" min="0" v-model="pointsToRemove"/>
             </label>
             <a id="points-error">{{ pointsError }}</a>
