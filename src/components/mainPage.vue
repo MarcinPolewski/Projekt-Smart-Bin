@@ -4,7 +4,7 @@
             <div id="img-div">
                 <img src="../assets/kosz.png">
                 <p>{{ binName }} ({{ binDepth }}cm)</p>
-                <p>Wypełniony w {}%</p>
+                <p>Wypełniony w {{ fillingPercentage }}%</p>
             </div>
             <div id="info">
                 <div id="info-graphic">
@@ -51,6 +51,17 @@ export default
         var whenEmptied = ref("")
         var whoNow = ref("")
         var whoNext = ref("")
+        var fillingPercentage = ref("")
+
+        const checkFilling = async () =>
+        {
+            const response = await axios
+            .get(`${endpoint}bins/1/`)
+
+            let status = response.data.bin_status
+
+            fillingPercentage.value = 100*status/binDepth.value
+        }
 
         const fetchBinName = async () =>
         {
@@ -72,7 +83,10 @@ export default
 
         fetchBinName()
 
-        return {binName, binDepth, pointsToAdd, pointsToRemove, whenEmptied, whoNext, whoNow}
+        checkFilling()
+        //setInterval(checkFilling, 1000)
+
+        return {binName, binDepth, pointsToAdd, pointsToRemove, whenEmptied, whoNext, whoNow, fillingPercentage}
     }
 }
 </script>

@@ -44,6 +44,13 @@ export default
 
         const addUser = async () =>
         {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!regex.test(currentUserMail.value))
+            {
+                warning_error.value = "Błędny adres email"
+                return
+            }
+
             try
             {
                 let data =
@@ -51,7 +58,8 @@ export default
                     user_name: currentUserName.value,
                     user_mail: currentUserMail.value,
                     statistics_days: statistics.value,
-                    which_bin: 1
+                    which_bin: 0,
+                    points_status: 0
                 }
                 let dataJ = JSON.stringify(data)
                 await axios
@@ -77,11 +85,12 @@ export default
                 const response = await axios.get(`${endpoint}users/`);
                 const responseData = response.data;
 
+                userList.value = []
+
                 responseData.forEach((user) =>
                 {
                     userList.value.push(user);
                 });
-                console.log(userList.value)
             }
             catch (error)
             {

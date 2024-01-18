@@ -8,21 +8,21 @@
             <div id="main-assign">
                 <p>Przypisz użytkownika:</p>
                 <select v-model="userToRegister">
-                    <option v-for="user in registeredUsers" :key="index">{{ user }}</option>
+                    <option v-for="user in registeredUsers" :key="user" :value="user">{{ user.user_name }}</option>
                 </select>
                 <input type="button" id="confirm" value="Potwierdź" @click="addUser(userToRegister)">
             </div>
             <div id="main-remove">
                 <p>Usuń użytkownika:</p>
                 <select v-model="userToRemove">
-                    <option v-for="user in selectedUsers" :key="index">{{ user }}</option>
+                    <option v-for="user in selectedUsers" :key="user" :value="user">{{ user.user_name }}</option>
                 </select>
                 <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
             </div>
             <div id="main-current">
-                <p>Przypisani użytkownicy:</p>
+                <p>Użytkownicy przypisani do Kosz pod zlewem:</p>
                 <ul>
-                    <li v-for="user in selectedUsers" :key="index">{{ user }}</li>
+                    <li v-for="user in selectedUsers" :key="user" :value="user">{{ user.user_name }}</li>
                 </ul>
             </div>
         </div>
@@ -57,35 +57,136 @@
     </div>
 </template>
 <script>
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
+import axios from "axios";
 
 export default
 {
     setup()
     {
+        const endpoint = inject("g_endpoint")
         var registeredUsers = ref([])
         var selectedUsers = ref([])
+
         var userToRegister = ref()
         var userToRemove = ref()
 
-        for(let i = 0; i < 10; i++)
+        const addUser = async (value) =>
         {
-            registeredUsers.value.push(`user ${i}`)
-        }
+            if(!value)
+                return
 
-        const addUser = (value) =>
-        {
-            selectedUsers.value.push(value)
-        }
+            let userId = value.id_user
 
-        const removeUser = (value) =>
-        {
-            const indexToRemove = selectedUsers.value.findIndex(user => user === value);
-            if (indexToRemove !== -1)
+            let data =
             {
-                selectedUsers.value.splice(indexToRemove, 1);
+                user_name: value.user_name,
+                user_mail: value.user_mail,
+                statistics_days: value.statistics_days,
+                which_bin: 1,
+                points_status: value.points_status
+            }
+            let dataJ = JSON.stringify(data)
+
+            try
+            {
+                await axios.put(`${endpoint}users/${userId}/`, dataJ,
+                {
+                    withCredentials: true,
+                    headers: {
+                    'Content-Type': 'application/json',
+                    }
+                })
+            }
+            catch (error)
+            {
+                console.error(error);
+            }
+
+            fetchSelectedUsers()
+            fetchRegisteredUsers()
+        }
+
+        const removeUser = async (value) =>
+        {
+            if(!value)
+                return
+
+            let userId = value.id_user
+
+            let data =
+            {
+                user_name: value.user_name,
+                user_mail: value.user_mail,
+                statistics_days: value.statistics_days,
+                which_bin: 0,
+                points_status: value.points_status
+            }
+            let dataJ = JSON.stringify(data)
+
+            try
+            {
+                await axios.put(`${endpoint}users/${userId}/`, dataJ,
+                {
+                    withCredentials: true,
+                    headers: {
+                    'Content-Type': 'application/json',
+                    }
+                })
+            }
+            catch (error)
+            {
+                console.error(error);
+            }
+
+            fetchSelectedUsers()
+            fetchRegisteredUsers()
+        }
+
+        const fetchRegisteredUsers = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${endpoint}users/`);
+                const responseData = response.data;
+
+                registeredUsers.value = []
+
+                responseData.forEach((user) =>
+                {
+                    if(user.which_bin != "1")
+                        registeredUsers.value.push(user);
+                });
+            }
+            catch (error)
+            {
+                console.error(error);
             }
         }
+
+        const fetchSelectedUsers = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${endpoint}users/`);
+                const responseData = response.data;
+
+                selectedUsers.value = []
+
+                responseData.forEach((user) =>
+                {
+                    if(user.which_bin == "1")
+                        selectedUsers.value.push(user);
+                });
+            }
+            catch (error)
+            {
+                console.error(error);
+            }
+        }
+
+        fetchRegisteredUsers()
+        fetchSelectedUsers()
 
         return {registeredUsers, selectedUsers, userToRegister, userToRemove, addUser, removeUser}
     }
