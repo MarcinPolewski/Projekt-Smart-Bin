@@ -7,6 +7,7 @@ from TrashApp.serializers import *
 from rest_framework.viewsets import ModelViewSet
 from django.forms.models import model_to_dict
 import json
+import copy
 from datetime import datetime
 import urllib.parse
 
@@ -74,7 +75,15 @@ def logsApi(request, id=0):
         user_serializer = TblBinLogsSerializer(user, many=True)
         return JsonResponse(user_serializer.data, safe=False)
     elif request.method == "POST":
-        user_data = JSONParser().parse(request)
+        print(request)
+        user_data = request.POST.dict()
+        try:
+            user_data = JSONParser().parse(request)
+        except Exception:
+            pass
+        current_date = datetime.now()
+        date_string = current_date.strftime("%d-%m-%Y %H:%M")
+        user_data.update({"date_log": date_string})
         user_serializer = TblBinLogsSerializer(data=user_data)
         if user_serializer.is_valid():
             user_serializer.save()
@@ -128,15 +137,15 @@ def takeoutApi(request, id=0):
         takeout_serializer = TblWynoszenieSerializer(takeout, many=True)
         return JsonResponse(takeout_serializer.data, safe=False)
     elif request.method == "POST":
+        print(request.POST)
+        takeout_data = (request.POST).dict()
+        print(takeout_data)
         try:
             takeout_data = JSONParser().parse(request)
             print(takeout_data)
         except Exception:
-            reuquest_without_b = str(request.body).strip("b'")
-            request_decoded = urllib.parse.parse_qs(reuquest_without_b)
-            takeout_data = request_decoded
-            for field in takeout_data:
-                takeout_data.update({field: takeout_data.get(field)[0]})
+            # reuquest_without_b = str(request.POST).strip("b'")
+            pass
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
         current_date = datetime.now()
         date_string = current_date.strftime("%d-%m-%Y %H:%M")
