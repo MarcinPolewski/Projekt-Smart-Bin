@@ -6,7 +6,7 @@
         <div id="baner-nav">
             <a class="button" @click="show_buttons">Rozwiń</a>
             <router-link to="/add-user" class="menu">Dodaj Użytkownika</router-link>
-            <router-link to="/assign-user" class="menu">Przypisz Użytkownika</router-link>
+            <router-link to="/assign-user" class="menu">Ustawienia</router-link>
             <router-link to="/punctation" class="menu">Punktacja</router-link>
             <!-- <router-link to="/filling-level" class="menu">Zapełnienie Kosza</router-link> -->
         </div>

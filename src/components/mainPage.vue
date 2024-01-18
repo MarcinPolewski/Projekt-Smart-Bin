@@ -13,7 +13,7 @@
                             Teraz
                         </a>
                         <a class="green-text">
-                            {}{{ whoNow }}
+                            {{ whoNow }}
                         </a>
                     </div>
                     <div class="info-graphics">
@@ -21,13 +21,13 @@
                             Później
                         </a>
                         <a class="green-text">
-                            {}{{ whoNext }}
+                            {{ whoNext }}
                         </a>
                     </div>
                 </div>
                 <div id="info-description">
                     <h2>Uwaga!</h2>
-                    <a>Kosz nie został wyniesiony od {} {{ whenEmptied }}h</a>
+                    <a>Kosz nie został wyniesiony od {{ whenEmptied }}</a>
                     <a>Dostaniesz {{ pointsToAdd }} pkt za wyniesienie</a>
                     <a>Za każde 12h zabierzemy ci {{ pointsToRemove }} pkt</a>
                 </div>
@@ -53,6 +53,8 @@ export default
         var whoNext = ref("")
         var fillingPercentage = ref("")
 
+        var nearestDates = ref("")
+
         const checkFilling = async () =>
         {
             const response = await axios
@@ -68,12 +70,27 @@ export default
             try
             {
                 const response = await axios
-                .get(`${endpoint}bins/1/`)
+                .get(`${endpoint}bins/1/`);
 
-                binName.value = response.data.bin_name
-                binDepth.value = response.data.bin_depth
-                pointsToAdd.value = response.data.adding_points
-                pointsToRemove.value = response.data.subtrack_points
+                binName.value = response.data.bin_name;
+                binDepth.value = response.data.bin_depth;
+                pointsToAdd.value = response.data.adding_points;
+                pointsToRemove.value = response.data.subtrack_points;
+
+                const response2 = await axios
+                .get(`${endpoint}schedule/`);
+
+                nearestDates.value = [];
+
+                response2.data.forEach((element) =>
+                {
+                    nearestDates.value.push(element.data);
+                });
+
+                nearestDates.value = findNearestDates(nearestDates.value)
+
+                whoNow.value = nearestDates.value[0]
+                whoNext.value = nearestDates.value[1]
             }
             catch(error)
             {
@@ -81,12 +98,89 @@ export default
             }
         }
 
+        const findNearestDates = (variables) =>
+        {
+            const today = new Date();
+            const dateList = [];
+
+            for (const variable of variables)
+            {
+                const date = new Date(variable);
+                if (!isNaN(date.getTime()))
+                {
+                    dateList.push(date);
+                }
+            }
+
+            if (dateList.length === 0)
+            {
+                return ["Dat nie ustalono", "Dat nie ustalono"];
+            }
+
+            dateList.sort((a, b) => a - b);
+
+            let closestDates = [];
+            for (let i = 0; i < dateList.length; i++)
+            {
+                if (dateList[i] >= today)
+                {
+                    closestDates.push(dateList[i]);
+                }
+                if (closestDates.length === 2)
+                {
+                    break;
+                }
+            }
+
+            if (closestDates.length < 2)
+            {
+                return ["Dat nie ustalono", "Dat nie ustalono"];
+            }
+
+            const formattedDates = closestDates.map(date =>
+            {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            });
+
+            return formattedDates;
+        }
+
+        const fetchTakeoutDate = async () =>
+        {
+            try {
+                const response = await axios.get(`${endpoint}takeout/`);
+
+                if (response.data.length > 0) {
+                    const takeoutDate = new Date(response.data[response.data.length - 1].date);
+                    const currentTime = new Date();
+
+                    const timeDifference = currentTime.getTime() - takeoutDate.getTime();
+                    const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60)); // Liczba pełnych godzin
+                    const minutesDifference = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)); // Liczba pełnych minut
+                    const secondsDifference = Math.floor((timeDifference % (1000 * 60)) / 1000); // Liczba pełnych sekund
+
+                    whenEmptied.value = (`${hoursDifference} godzin ${minutesDifference} minut ${secondsDifference} sekund`);
+                } else {
+                    console.log("Brak danych o wyjściach.");
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         fetchBinName()
 
         checkFilling()
-        //setInterval(checkFilling, 1000)
 
-        return {binName, binDepth, pointsToAdd, pointsToRemove, whenEmptied, whoNext, whoNow, fillingPercentage}
+        fetchTakeoutDate()
+
+        setInterval(checkFilling, 1000)
+        setInterval(fetchTakeoutDate, 1000)
+
+        return {binName, binDepth, pointsToAdd, pointsToRemove, whenEmptied, whoNext, whoNow, fillingPercentage, nearestDates}
     }
 }
 </script>
@@ -226,9 +320,12 @@ export default
                     display: flex;
                     flex-direction: column;
                     width: 100%;
+                    align-items: flex-start;
 
                     #info-graphic
                     {
+                        width: 50%;
+                        max-width: 500px;
                         display: flex;
                         justify-content: space-between;
                         .info-graphics

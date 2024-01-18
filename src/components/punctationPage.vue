@@ -2,7 +2,7 @@
     <div id="main">
         <div class="points" v-for="user in userList" :key="user">
             <h2>{{user.user_name}}</h2>
-            <a>{}pkt</a>
+            <a>{{ user.points_status }} pkt</a>
         </div>
     </div>
 </template>
@@ -29,6 +29,7 @@ export default
                 {
                     userList.value.push(user);
                 });
+                userList.value.sort((a, b) => b.points_status - a.points_status)
                 console.log(userList.value)
             }
             catch (error)

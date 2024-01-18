@@ -8,6 +8,7 @@
             <div id="main-assign">
                 <p>Przypisz użytkownika:</p>
                 <select v-model="userToRegister">
+                    <option disabled selected hidden value="">Przypisz użytkownika do: Kosz pod zlewem</option>
                     <option v-for="user in registeredUsers" :key="user" :value="user">{{ user.user_name }}</option>
                 </select>
                 <input type="button" id="confirm" value="Potwierdź" @click="addUser(userToRegister)">
@@ -15,12 +16,13 @@
             <div id="main-remove">
                 <p>Usuń użytkownika:</p>
                 <select v-model="userToRemove">
+                    <option disabled selected hidden value="">Usuń użytkownika z: Kosz pod zlewem</option>
                     <option v-for="user in selectedUsers" :key="user" :value="user">{{ user.user_name }}</option>
                 </select>
                 <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
             </div>
             <div id="main-current">
-                <p>Użytkownicy przypisani do Kosz pod zlewem:</p>
+                <p>Użytkownicy przypisani do: Kosz pod zlewem:</p>
                 <ul>
                     <li v-for="user in selectedUsers" :key="user" :value="user">{{ user.user_name }}</li>
                 </ul>
@@ -29,30 +31,31 @@
         <div id="harmonogram">
             <h2>Dodaj harmonogram</h2>
             <label for="date">Ustaw datę wyniesienia
-                <input type="date" id="date"/>
+                <input type="date" id="date" v-model="takeoutDate"/>
             </label>
-            <select>
-                <option disabled selected hidden>Wybierz użytkownika, który ma wynieść śmieci</option>
-                <option>Kasia</option>
-                <option>Tomek</option>
-            </select>
-            <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
+            <!-- <select v-model="userTakeout">
+                <option disabled selected hidden value="">Wybierz użytkownika, który ma wynieść śmieci</option>
+                <option v-for="user in selectedUsers" :key="user" :value="user">{{ user.user_name }}</option>
+            </select> -->
+            <input type="button" id="confirm" value="Potwierdź" @click="addSchedule(takeoutDate)">
+            <a>{{ scheduleError }}</a>
         </div>
         <div id="konfiguracja">
             <h2>Pozostałe ustawienia</h2>
             <label>
                 Po ilu godzinach ma przychodzić powiadomienie o niewyniesieniu kosza?
-                <input type="number" min="0"/>
+                <input type="number" min="0" v-model="notification"/>
             </label>
             <label>
                 Punkty przyznawane za wyniesienie kosza
-                <input type="number" min="0"/>
+                <input type="number" min="0" v-model="pointsToAdd"/>
             </label>
             <label>
                 Punkty odbierane za każde 12h niewyniesienia kosza
-                <input type="number" min="0"/>
+                <input type="number" min="0" v-model="pointsToRemove"/>
             </label>
-            <input type="button" id="confirm" value="Potwierdź" @click="removeUser(userToRemove)">
+            <a id="points-error">{{ pointsError }}</a>
+            <input type="button" id="confirm" value="Potwierdź" @click="changePoints()">
         </div>
     </div>
 </template>
@@ -68,8 +71,17 @@ export default
         var registeredUsers = ref([])
         var selectedUsers = ref([])
 
-        var userToRegister = ref()
-        var userToRemove = ref()
+        var userToRegister = ref("")
+        var userToRemove = ref("")
+
+        var notification = ref(0)
+        var pointsToAdd = ref(0)
+        var pointsToRemove = ref(0)
+
+        var takeoutDate = ref("")
+
+        var scheduleError = ref("")
+        var pointsError = ref("")
 
         const addUser = async (value) =>
         {
@@ -97,6 +109,7 @@ export default
                     'Content-Type': 'application/json',
                     }
                 })
+                userToRegister.value = ""
             }
             catch (error)
             {
@@ -133,6 +146,7 @@ export default
                     'Content-Type': 'application/json',
                     }
                 })
+                userToRemove.value = ""
             }
             catch (error)
             {
@@ -185,10 +199,105 @@ export default
             }
         }
 
+        const fetchPoints = async () =>
+        {
+            try
+            {
+                const response = await axios.get(`${endpoint}bins/1/`);
+
+                notification.value = response.data.emp_reminder
+                pointsToAdd.value = response.data.adding_points
+                pointsToRemove.value = response.data.subtrack_points
+            }
+            catch (error)
+            {
+                console.error(error);
+            }
+        }
+
+        const changePoints = async () =>
+        {
+            let bin_data
+            try
+            {
+                const response = await axios.get(`${endpoint}bins/1/`);
+                bin_data = response
+            }
+            catch(error)
+            {
+                console.error(error)
+            }
+
+            let data =
+            {
+                id_bin: bin_data.data.id_bin,
+                bin_name: bin_data.data.bin_name,
+                bin_depth: bin_data.data.bin_depth,
+                emp_calendar: bin_data.data.emp_calendar,
+                emp_reminder: notification.value,
+                adding_points: pointsToAdd.value,
+                subtrack_points: pointsToRemove.value,
+                bin_status: bin_data.data.bin_status
+            }
+            let dataJ = JSON.stringify(data)
+
+            try
+            {
+                await axios.put(`${endpoint}bins/1/`, dataJ,
+                {
+                    withCredentials: true,
+                    headers: {
+                    'Content-Type': 'application/json',
+                    }
+                })
+                userToRegister.value = ""
+                pointsError.value = "Prawidłowo zmieniono ustawienia"
+            }
+            catch (error)
+            {
+                console.error(error);
+                pointsError.value = "Błędne dane"
+            }
+        }
+
+        const addSchedule = async (value) =>
+        {
+            if(!value)
+            {
+                scheduleError.value = "Nieprawidłowa data"
+                return
+            }
+
+            let data =
+            {
+                data: value,
+                bin_id: 1
+            }
+            let dataJ = JSON.stringify(data)
+
+            try
+            {
+                await axios.post(`${endpoint}schedule/`, dataJ,
+                {
+                    withCredentials: true,
+                    headers: {
+                    'Content-Type': 'application/json',
+                    }
+                })
+                takeoutDate.value = ""
+                scheduleError.value = "Harmonogram dodany prawidłowo"
+            }
+            catch (error)
+            {
+                console.error(error);
+            }
+        }
+
         fetchRegisteredUsers()
         fetchSelectedUsers()
+        fetchPoints()
 
-        return {registeredUsers, selectedUsers, userToRegister, userToRemove, addUser, removeUser}
+        return {registeredUsers, selectedUsers, userToRegister, userToRemove, takeoutDate, scheduleError, pointsToAdd, pointsToRemove, notification, pointsError, addUser, removeUser, addSchedule, changePoints}
     }
 }
 </script>
@@ -224,6 +333,12 @@ export default
         #top
         {
             margin-top: 5%;
+            width: 100%;
+            text-align: center;
+        }
+
+        #points-error
+        {
             width: 100%;
             text-align: center;
         }

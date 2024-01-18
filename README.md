@@ -1,4 +1,4 @@
-# smieci
+# Śmieci
 
 ## Setup projektu
 ```
@@ -10,7 +10,7 @@ npm install
 npm run serve
 ```
 
-### Duild (to będzie stało na serwerze)
+### Build (to będzie stało na serwerze)
 ```
 npm run build
 ```
@@ -25,9 +25,9 @@ Frontend naszej aplikacji został w pełni zrealizowany przy użyciu reaktywnego
 
 ### Struktura Projektu
 
-Projekt jest podzielony na komponenty, które reprezentują logicznie wydzielone podstrony. Dostęp do poszczególnych komponentów uzyskuje się poprzez wykorzystanie drzewa linków dostarczanego przez Vue Router.
+Projekt jest podzielony na widoki, które reprezentują logicznie wydzielone podstrony. Dostęp do poszczególnych widoków uzyskuje się poprzez wykorzystanie drzewa linków dostarczanego przez Vue Router.
 
-Każdy komponent składa się z trzech głównych części:
+Każdy komponent (widok) składa się z trzech głównych części:
 
     HTML: Definiuje strukturę i układ elementów na stronie.
     JavaScript (Vue.js): Odpowiada za logikę komponentu, interakcję z danymi i dynamiczną aktualizację interfejsu.
