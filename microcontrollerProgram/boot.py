@@ -27,7 +27,8 @@ from constants import (
 class BinStatusHandler:
     """handles status of bin"""
 
-    def __init__(self):
+    def __init__(self, screen_handler):
+        self._screen_handler = screen_handler
         self._base_depth = 10
         self._current_depth = 10
         self._lid_is_up = True
@@ -49,20 +50,32 @@ class BinStatusHandler:
     def current_depth(self):
         return self._current_depth
 
+    def exit_lid_up_phase(self):
+        self._phase = MAIN_PHASE
+
     def distance_value_changed(self, new_value):
         """method called when distance sensor has detected a change"""
-        print(new_value)
+        self._phase = LID_UP_PHASE
+        # print(new_value)
 
     def joystick_interaction(self, event_type):
         """method called when user has interacted with joystick"""
         if event_type == JOYSTICK_MOVED_DOWN:
-            print("moeved down")
+            if self.phase == LID_UP_PHASE:
+                self.exit_lid_up_phase()
+            # print("moeved down")
         elif event_type == JOYSTICK_MOVED_UP:
-            print("moeved up")
+            if self.phase == LID_UP_PHASE:
+                self.exit_lid_up_phase()
+            # print("moeved up")
         elif event_type == JOYSTICK_MOVED_LEFT:
-            print("moeved left")
+            if self.phase == LID_UP_PHASE:
+                self.exit_lid_up_phase()
+            # print("moeved left")
         elif event_type == JOYSTICK_MOVED_RIGHT:
-            print("moeved right")
+            if self.phase == LID_UP_PHASE:
+                self.exit_lid_up_phase()
+            # print("moeved right")
 
     def calibrate_bin(self):
         pass
@@ -72,6 +85,9 @@ class BinStatusHandler:
 
     def get_bin_fullness_percentage(self):
         return int((self._current_depth / self._base_depth) * 100)
+
+    def update(self):
+        self._screen_handler.set_phase(self._phase)
 
     # def update(self, read_distance):
 
@@ -84,44 +100,65 @@ class BinStatusHandler:
     #     elif
 
 
-# class ScreenHandler:
-#     """handles displaing on the screen and controlling phases"""
+class ScreenHandler:
+    """handles displaing on the screen and controlling phases"""
 
-#     def __init__(self):
-#         self._phase = MAIN_PHASE
+    def __init__(self, screen, screen_height, screen_width):
+        self._screen = screen
+        self._screen_height = screen_height
+        self._screen_width = screen_width
+        self._phase = None
 
-#     @property
-#     def phase(self):
-#         return self._phase
+    @property
+    def phase(self):
+        return self._phase
 
-#     def update(self):
-#         # method updates animations if such are happening
-#         pass
+    def set_phase(self, phase):
+        self._phase = phase
 
-#     def draw_main_phase(self):
+    def update(self):
+        # method updates animations if such are happening
+        pass
 
-#     def draw_lid_up_phase(self):
+    def draw_main_phase(self):
+        next_turn = "Jan"
 
-#     def draw_
+        self._screen.text("Main Phase", 0, 0)
+        self._screen.text("Next Victim:" + next_turn, 0, 10)
 
+    def draw_lid_up_phase(self):
+        self._screen.text("Lid was removed.", 0, 0)
+        self._screen.text("Reposition it", 0, 10)
+        self._screen.text("and tap joystick", 0, 20)
+        self._screen.text("to continue.", 0, 30)
 
-#     def draw(self):
-#         # method handles drawing elements on screen
-#         if self.phase == MAIN_PHASE:
-#             self.draw_main_phase()
-#         elif self.phase == LID_UP_PHASE:
-#             self.draw_lid_up_phase()
-#         elif self.phase == SUCCESS_PHASE:
-#             self.draw_success_phase()
-#         elif self.phase == SYNCING_PHASE:
-#             self.draw_syncing_phase()
-#         elif self.phase == SELECT_USER_PHASE:
-#             self.draw_select_user_phase
-#         pass
+    def draw(self):
+        self._screen.fill(0)
+        if self._phase == MAIN_PHASE:
+            self.draw_main_phase()
+        elif self._phase == LID_UP_PHASE:
+            self.draw_lid_up_phase()
+        self._screen.show()
+
+    # def draw(self):
+    #     # method handles drawing elements on screen
+    #     if self.phase == MAIN_PHASE:
+    #         self.draw_main_phase()
+    #     elif self.phase == LID_UP_PHASE:
+    #         self.draw_lid_up_phase()
+    #     elif self.phase == SUCCESS_PHASE:
+    #         self.draw_success_phase()
+    #     elif self.phase == SYNCING_PHASE:
+    #         self.draw_syncing_phase()
+    #     elif self.phase == SELECT_USER_PHASE:
+    #         self.draw_select_user_phase
+    #     else:
+
+    #     pass
 
 
 class InputHandler:
-    """method handles user input and triggers right methods in ScreenController"""
+    """method handles user input and triggers right methods in BinStatusHandler"""
 
     def __init__(self, bin_status_handler):
         self._bin_status_handler = bin_status_handler
@@ -195,6 +232,8 @@ class InputHandler:
             self._current_distance_reading = read_distance
 
     def update(self, joystick_x, joystick_y, distance):
+        """method checks if input values have changed and triggers right methods
+        in bin_status_controller"""
         self.update_joystick(joystick_x, joystick_y)
         self.update_ultrasonic_sensor(distance)
 
@@ -227,9 +266,11 @@ def main():
     sensor = HCSR04(trigger_pin=5, echo_pin=18, echo_timeout_us=10000)
 
     # initializing handlers
-    bin_status_handler = BinStatusHandler()
+    screen_handler = ScreenHandler(
+        screen=oled, screen_height=oled_height, screen_width=oled_width
+    )
+    bin_status_handler = BinStatusHandler(screen_handler=screen_handler)
     input_handler = InputHandler(bin_status_handler=bin_status_handler)
-    # screen_handler = ScreenHandler()
 
     while True:
         # fetching readings
@@ -238,18 +279,20 @@ def main():
         sd = sensor.distance_cm()
 
         input_handler.update(joystick_x=sx, joystick_y=sy, distance=sd)
+        bin_status_handler.update()
+        screen_handler.update()
 
-        time_passed = time.time()
+        screen_handler.draw()
 
-        oled.fill(0)
-        oled.text(str(sd), 0, 0)
-        oled.text(("start: " + str(start_time)), 0, 10)
-        oled.text(("now: " + str(time_passed)), 0, 20)
-        # oled.text(sx, 0, 0)
-        # oled.text(sy, 0, 10)
-        # oled.text(sd, 0, 20)
+        # oled.fill(0)
+        # oled.text(str(sd), 0, 0)
+        # oled.text(("start: " + str(start_time)), 0, 10)
+        # oled.text(("now: " + str(time_passed)), 0, 20)
+        # # oled.text(sx, 0, 0)
+        # # oled.text(sy, 0, 10)
+        # # oled.text(sd, 0, 20)
 
-        oled.show()
+        # oled.show()
 
 
 if __name__ == "__main__":
