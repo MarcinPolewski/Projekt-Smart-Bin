@@ -24,15 +24,41 @@ from constants import (
 )
 
 
+class ServerConnectivityHandler:
+    # @TODO
+    def __init__(self):
+        pass
+
+    def send_depth_to_server(self, depth):
+        """sends current depth detected to server"""
+        pass
+
+    def send_log_to_server(self, who_took_out, who_should_have):
+        """sends info, when somebody took out the trash"""
+        pass
+
+    def fetch_users_from_server(self):
+        data = [{"user_name": "Jórek Ogórek"}, {"user_name": "Jacek Wacek"}]
+        return data
+
+    def fetch_bin_data(self):
+        data = [{"bin_name", "THE bin"}]
+        return data
+
+
 class BinStatusHandler:
     """handles status of bin"""
 
-    def __init__(self, screen_handler):
+    def __init__(self, screen_handler, server_connectivity_hanlder):
         self._screen_handler = screen_handler
+        self._server_handler = server_connectivity_hanlder
         self._base_depth = 10
         self._current_depth = 10
         self._lid_is_up = True
         self._phase = START_PHASE
+
+        self._designated_user = None  # one who should take out
+        self._selected_user = None  # one who did take out the trash
 
     @property
     def phase(self):
@@ -50,13 +76,26 @@ class BinStatusHandler:
     def current_depth(self):
         return self._current_depth
 
-    def exit_lid_up_phase(self):
+    def was_bin_emptied(self, new_distance):
+        # TODO
+        return False
+
+    def exit_lid_up_phase(self, new_distance_value):
         self._phase = MAIN_PHASE
+
+        # sending current status of bin
+        self._server_handler.send_depth_to_server(new_distance_value)
+
+        # sending log if bin was emptied
+        if self.was_bin_emptied(new_distance_value):
+            self._server_handler.send_log_to_server(
+                designated_user=self._designated_user,
+                selected_user=self._selected_user,
+            )
 
     def distance_value_changed(self, new_value):
         """method called when distance sensor has detected a change"""
         self._phase = LID_UP_PHASE
-        # print(new_value)
 
     def joystick_interaction(self, event_type):
         """method called when user has interacted with joystick"""
@@ -114,6 +153,7 @@ class ScreenHandler:
         return self._phase
 
     def set_phase(self, phase):
+        """method changes phase and starts animation towars next phase"""
         self._phase = phase
 
     def update(self):
@@ -223,9 +263,6 @@ class InputHandler:
                 # register distance change
                 self._registered_distance = read_distance
                 self._bin_status_handler.distance_value_changed(read_distance)
-
-                # @TODO register inpoiut
-                # @TODO switch phase to lid removed phase
         else:
             # wartość analizowanego odczytu się zmieniłą
             self._current_distance_reading_time = time.time()
@@ -266,10 +303,14 @@ def main():
     sensor = HCSR04(trigger_pin=5, echo_pin=18, echo_timeout_us=10000)
 
     # initializing handlers
+    server_connectivity_hanlder = ServerConnectivityHandler()
     screen_handler = ScreenHandler(
         screen=oled, screen_height=oled_height, screen_width=oled_width
     )
-    bin_status_handler = BinStatusHandler(screen_handler=screen_handler)
+    bin_status_handler = BinStatusHandler(
+        screen_handler=screen_handler,
+        server_connectivity_hanlder=server_connectivity_hanlder,
+    )
     input_handler = InputHandler(bin_status_handler=bin_status_handler)
 
     while True:
