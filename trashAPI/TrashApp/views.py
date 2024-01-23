@@ -10,8 +10,31 @@ import json
 import copy
 from datetime import datetime
 import urllib.parse
-
+from django.core.mail import send_mail
 # Create your views here.
+
+def send_info(bin_id, who_did):
+    users = TblUzytkownicyKonfig.objects.all()
+    users_serializer = TblUzytkownicyKonfigSerializer(users, many=True)
+    bin = TblKoszeKonfiguracyjna.objects.get(id_bin=bin_id)
+    bin_serializer = TblKoszeKonfiguracyjnaSerializer(bin)
+    bin_name = bin_serializer.data['bin_name']
+    our_mail = 'trasherspw@gmail.com'
+    recipents_list = []
+    for user in users_serializer.data:
+        if user['id_user'] == who_did:
+            who_did_name= user['user_name']
+    content = f'The trash in {bin_name} has been taken out by {who_did_name}.'
+    for user in users_serializer.data:
+        print(user['which_bin'])
+        mail = user['user_mail']
+        recipents_list.append(mail)
+        print(content)
+        print(mail)
+        print(our_mail)
+    send_mail("Trash taken out", content, our_mail, recipents_list, fail_silently = False)
+
+
 
 
 @csrf_exempt
@@ -145,12 +168,9 @@ def takeoutApi(request, id=0):
         takeout_serializer = TblWynoszenieSerializer(takeout, many=True)
         return JsonResponse(takeout_serializer.data, safe=False)
     elif request.method == "POST":
-        print(request.POST)
         takeout_data = (request.POST).dict()
-        print(takeout_data)
         try:
             takeout_data = JSONParser().parse(request)
-            print(takeout_data)
         except Exception:
             # reuquest_without_b = str(request.POST).strip("b'")
             pass
@@ -189,6 +209,8 @@ def takeoutApi(request, id=0):
             if sub_serializer_new.is_valid():
                 sub_serializer_new.save()
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
+        print(takeout_data)
+        send_info(takeout_data['which_bin'], takeout_data['who_did'])
         if takeout_serializer.is_valid():
             takeout_serializer.save()
         if user_serializer_new.is_valid():

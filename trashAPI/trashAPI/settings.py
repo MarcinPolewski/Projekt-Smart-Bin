@@ -26,7 +26,12 @@ SECRET_KEY = 'django-insecure-s1j!ir1wdpsk%r$qi8dw##p$a%^7v-=jw*!c4d+!f_z!0b8_^)
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+EMAIL_HOST_USER = 'trasherspw@gmail.com'
+EMAIL_HOST_PASSWORD = 'nity fqol fiap mwyu'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_TIMEOUT = 2
 
 # Application definition
 
