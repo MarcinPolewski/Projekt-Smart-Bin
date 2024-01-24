@@ -2,6 +2,7 @@ from machine import Pin, ADC, SoftI2C
 from hcsr04 import HCSR04
 import ssd1306
 import network
+import urequests
 
 import time
 
@@ -61,8 +62,10 @@ class User:
 class ServerConnectivityHandler:
     # @TODO
     def __init__(self):
+        self._bin_id = 1
         self._is_wifi_connected = False
         self._station = network.WLAN(network.STA_IF)
+        self._server_link = "http://127.0.0.1:8000"
         pass
 
     def connect_to_wifi(self):
@@ -100,43 +103,63 @@ class ServerConnectivityHandler:
 
         return False
 
-    def upload_fullness_percentage(self, depth):
+    def upload_fullness_percentage(self, percentage):
+        print("1")
         """sends current depth detected to server"""
+        data = {"date_log": "", "bin_id": self._bin_id, "bin_status": percentage}
+        link = self._server_link + "api/logs/"
+        urequests.post(link, data)
         time.sleep(0.5)
         pass
 
     def send_log_to_server(self, who_took_out, who_should_have):
         """sends info, when somebody took out the trash"""
+        data = {
+            "id_empty": 1,
+            "which_bin": self._bin_id,
+            "who_should": who_should_have,
+            "who_did": who_took_out,
+            "date": "2020",
+            "add_points": 1,
+            "sub_points": 1,
+        }
+        link = self._server_link + "api/takout/"
         if self.handle_connection():
-            print(
-                "trash out! shoud: "
-                + str(who_should_have)
-                + " did "
-                + str(who_took_out)
-            )
+            urequests.post(link, data)
+            # print(
+            #     "trash out! shoud: "
+            #     + str(who_should_have)
+            #     + " did "
+            #     + str(who_took_out)
+            # )
             time.sleep(0.5)
 
     def process_users(self, users):
-        users_classes = []
+        user_classes = []
         for user in users:
             user_class = User(
-                user_id=user["user_id"],
+                user_id=user["id_user"],
                 user_name=user["user_name"],
                 points_status=user["points_status"],
             )
-            users_classes.append(user_class)
-        time.sleep(0.5)
-        return users_classes
+            user_classes.append(user_class)
+        return user_classes
 
     def fetch_users_from_server(self):
         users = []
+        link = self._server_link + "api/users/"
+
         if self.handle_connection():
-            users = [
-                {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
-                {"user_id": 7465, "user_name": "Jarek Darek", "points_status": 10},
-                {"user_id": 4321, "user_name": "Jurek Ogorek", "points_status": 2},
-                {"user_id": 1234, "user_name": "Jacek Wacek", "points_status": 5},
-            ]
+            print("4")
+            users = urequests.get(link)
+            print("5")
+            # users = [
+            #     {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
+            #     {"user_id": 7465, "user_name": "Jarek Darek", "points_status": 10},
+            #     {"user_id": 4321, "user_name": "Jurek Ogorek", "points_status": 2},
+            #     {"user_id": 1234, "user_name": "Jacek Wacek", "points_status": 5},
+            # ]
+            print("fetched!")
             users = self.process_users(users)
             time.sleep(0.5)
         return users
@@ -278,6 +301,7 @@ class BinStatusHandler:
         self._server_handler.send_log_to_server(
             who_took_out=self._displayed_user, who_should_have=self._designated_user
         )
+        self.fetch_users_from_server()
 
         self._displayed_user.add_point()
         self.update_next_designated_user()
