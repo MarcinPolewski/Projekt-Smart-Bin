@@ -24,6 +24,8 @@ from constants import (
     PERCENTAGE_TO_REGISTER_TAKING_OUT,
 )
 
+from memoryHandler import MemoryHandler
+
 
 class User:
     def __init__(self, user_id, user_name, points_status):
@@ -61,11 +63,13 @@ class ServerConnectivityHandler:
 
     def upload_fullness_percentage(self, depth):
         """sends current depth detected to server"""
+        time.sleep(0.5)
         pass
 
     def send_log_to_server(self, who_took_out, who_should_have):
         """sends info, when somebody took out the trash"""
-        print("trash out!")
+        print("trash out! shoud: " + str(who_should_have) + " did " + str(who_took_out))
+        time.sleep(0.5)
         pass
 
     def process_users(self, users):
@@ -77,49 +81,57 @@ class ServerConnectivityHandler:
                 points_status=user["points_status"],
             )
             users_classes.append(user_class)
-            return users_classes
+        time.sleep(0.5)
+        return users_classes
 
     def fetch_users_from_server(self):
         users = [
-            {"user_id": 5344, "user_name": "Julka Górka", "points_status": 0},
+            {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
             {"user_id": 7465, "user_name": "Jarek Darek", "points_status": 10},
-            {"user_id": 4321, "user_name": "Jórek Ogórek", "points_status": 2},
+            {"user_id": 4321, "user_name": "Jurek Ogorek", "points_status": 2},
             {"user_id": 1234, "user_name": "Jacek Wacek", "points_status": 5},
         ]
         users = self.process_users(users)
+        time.sleep(0.5)
         return users
 
     def fetch_bin_data(self):
-        data = [{"bin_name", "THE bin"}]
+        data = {"bin_name": "THE bin"}
+        time.sleep(0.5)
         return data
+
+    def fetch_bin_name(self):
+        data = self.fetch_bin_data()
+        time.sleep(0.5)
+        return data["bin_name"]
 
 
 class BinStatusHandler:
     """handles status of bin"""
 
-    def __init__(self, screen_handler, server_connectivity_hanlder):
+    def __init__(self, screen_handler, server_connectivity_hanlder, memory_handler):
         self._screen_handler = screen_handler
         self._server_handler = server_connectivity_hanlder
+        self._memory_handler = memory_handler
+
         self._base_depth = 10
         self._current_depth = 5
-        self._lid_is_up = True
+
         self._phase = START_PHASE
 
+        self._bin_name = ""
         self._users = None
 
         self._designated_user = None  # one who should take out
         self._selected_user = None  # one who did take out the trash
         self._displayed_user = self._designated_user  # user displayed while selecting
+        self._displayed_user_idx = 0
 
         self._screen_handler.switch_to_start_phase()
 
     @property
     def phase(self):
         return self._phase
-
-    @property
-    def lid_is_up(self):
-        return self._lid_is_up
 
     @property
     def base_depth(self):
@@ -131,38 +143,45 @@ class BinStatusHandler:
 
     def was_bin_emptied(self, new_distance):
         distance_delta = abs(new_distance - self._base_depth)
+
+        # jesli aktualnie śmietnik jest pusty i wcześniej pełny powyzej poziomu jakiegos
         if (distance_delta < ULTRASONIC_SENSOR_TOLERANCE) and (
             self.get_bin_fullness_percentage() > PERCENTAGE_TO_REGISTER_TAKING_OUT
         ):
             return True
+
         return False
 
     def switch_to_select_user(self):
+        """method trigged when trash has been taken out and
+        doer must be selected"""
         self._phase = SELECT_USER_PHASE
         self._displayed_user = self._designated_user
-        self._screen_handler.set_phase(self._phase)
+        self._displayed_user_idx = 0  # displayed user is always first on the list
+        self._screen_handler.switch_to_select_user_phase(
+            self._displayed_user, points=self._displayed_user.points_status
+        )
 
     def exit_lid_up_phase(self, new_distance_value):
         """method triggered when user exits lid up phases"""
-        self._phase = MAIN_PHASE
-        next_user = "asdf"
-        self._screen_handler.switch_to_main_phase(
-            next_user, self.get_bin_fullness_percentage()
-        )
-
-        self._current_depth = new_distance_value
-
-        # sending current status of bin
-        percentage = self.get_bin_fullness_percentage()
-        self._server_handler.upload_fullness_percentage(percentage)
 
         if self.was_bin_emptied(new_distance_value):
             # bin has been emptied
             self.switch_to_select_user()
-
-            self._current_depth = new_distance_value
+            self._current_depth = self._base_depth
         else:
+            # bin has not been emptied
+            self._phase = MAIN_PHASE
             self._current_depth = new_distance_value
+
+            next_user = str(self._designated_user)
+            self._screen_handler.switch_to_main_phase(
+                next_user, self.get_bin_fullness_percentage()
+            )
+
+        # sending current status of bin
+        percentage = self.get_bin_fullness_percentage()
+        self._server_handler.upload_fullness_percentage(percentage)
 
     def distance_value_changed(self, new_value):
         """method called when distance sensor has detected a change"""
@@ -176,43 +195,72 @@ class BinStatusHandler:
     def switch_displayed_user(self, to_the_left):
         """switching displayed user during selecting user phase"""
         if to_the_left:
-            next_victim = "Lewicowy Jarek Marek"
+            self._displayed_user_idx -= 1
+            if self._displayed_user_idx < 0:
+                self._displayed_user_idx = len(self._users) - 1
+
+            next_victim = self._users[self._designated_user_idx]
 
             self._displayed_user = next_victim
-            self._screen_handler.set_next_victim(next_victim)
+            self._screen_handler.change_displayed_user(
+                next_victim, next_victim.points_status
+            )
         else:
-            next_victim = "Prawicowy Jarek Marek"
+            self._displayed_user_idx += 1
+            if self._displayed_user_idx >= len(self._users):
+                self._displayed_user_idx = 0
+
+            next_victim = self._users[self._displayed_user_idx]
 
             self._displayed_user = next_victim
-            self._screen_handler.set_next_victim(next_victim)
+            self._screen_handler.change_displayed_user(
+                next_victim, next_victim.points_status
+            )
 
     def update_next_designated_user(self):
         """next designated user is the one with the smalles amount of points"""
-        print(self._users)
         self._users = sorted(self._users, key=lambda x: x.points_status)
-        self._designated_user = self._users[1:]
-        print(self._users)
+        self._designated_user = self._users[0]
 
-    def user_selected(self, user):
+    def user_selected(self):
         """triggered when user has been selected"""
         self._phase = SYNCING_PHASE
+        self._screen_handler.switch_to_sync_phase()
+
         self._server_handler.send_log_to_server(
-            who_took_out=self._selected_user, who_should_have=self._designated_user
+            who_took_out=self._displayed_user, who_should_have=self._designated_user
         )
+
+        self._displayed_user.add_point()
         self.update_next_designated_user()
 
-    def fetch_from_server(self):
+        # after sync is completed phase will autoamtially change
+        self._phase = MAIN_PHASE
+        self._screen_handler.switch_to_main_phase(
+            percentage=self.get_bin_fullness_percentage(),
+            next_victim=self._designated_user,
+        )
+
+    def fetch_users_from_server(self):
         """fetches information from server"""
         self._users = self._server_handler.fetch_users_from_server()
 
     def handle_interaction_start_phase(self, event_type, distance):
-        print("swithing to main")
-        print(distance)
+        """when left press, configuration runs, when right, loading data from file"""
+        if event_type == JOYSTICK_MOVED_LEFT:
+            self.calibrate_bin(distance)
+        elif event_type == JOYSTICK_MOVED_RIGHT:
+            self.load_configuration()
+            self._current_depth = distance
+        else:
+            return
 
-        self.fetch_from_server()
+        self._phase = SYNCING_PHASE
+        self._screen_handler.switch_to_sync_phase()
 
-        self.calibrate_bin(distance)
+        self.fetch_users_from_server()
         self.update_next_designated_user()
+
         self._phase = MAIN_PHASE
         self._screen_handler.switch_to_main_phase(
             next_victim=self._designated_user,
@@ -231,11 +279,10 @@ class BinStatusHandler:
         elif event_type == JOYSTICK_MOVED_RIGHT:
             self.switch_displayed_user(to_the_left=False)
         elif event_type == JOYSTICK_MOVED_DOWN:
-            self.user_selected(user=self._displayed_user)
+            self.user_selected()
 
     def joystick_interaction(self, event_type, distance):
         """method called when user has interacted with joystick"""
-        print("event: " + str(event_type) + "phase: " + str(self._phase))
 
         if self._phase == START_PHASE:
             self.handle_interaction_start_phase(event_type, distance)
@@ -246,13 +293,32 @@ class BinStatusHandler:
         elif self._phase == SELECT_USER_PHASE:
             self.handle_interaction_select_user_phase(event_type, distance)
 
+    def load_configuration(self):
+        """loads bin configuration from file"""
+        data = self._memory_handler.load_configuration()
+        self._bin_name = data["bin_name"]
+        self._base_depth = data["base_depth"]
+
     def calibrate_bin(self, distance):
         """triggered when bin is calibrating"""
         self._base_depth = distance
+        self._current_depth = distance
+
+        # fetching bin name
+        self._phase = SYNCING_PHASE
+        self._screen_handler.switch_to_sync_phase()
+
+        bin_name = self._server_handler.fetch_bin_name()
+        self._bin_name = bin_name
+
+        # saving configuration to file
+        data = {"bin_name": self._bin_name, "base_depth": self._base_depth}
+        self._memory_handler.save_configuration(data)
 
     def get_bin_fullness_percentage(self):
         """returns percentage of bin fullness"""
-        return int((self._current_depth // self._base_depth) * 100)
+        percentage = int(100 - ((self._current_depth / self._base_depth) * 100))
+        return max(percentage, 0)
 
 
 class ScreenHandler:
@@ -271,13 +337,6 @@ class ScreenHandler:
     def phase(self):
         return self._phase
 
-    def set_phase(self, phase):
-        """method changes phase and starts animation towars next phase"""
-        self._phase = phase
-
-    def set_next_victim(self, next_victim):
-        self._next_victim = next_victim
-
     def update(self):
         # method updates animations if such are happening
         pass
@@ -286,8 +345,9 @@ class ScreenHandler:
         self._phase = START_PHASE
         self._screen.fill(0)
 
-        self._screen.text("Thrasher The Bin", 20, 0)
-        self._screen.text("by Trashers", 20, 10)
+        self._screen.text("Thrasher The Bin", 0, 10)
+
+        self._screen.text("by Trashers", 20, 30)
 
         self._screen.show()
 
@@ -297,8 +357,8 @@ class ScreenHandler:
 
         # @TODO - hadnle when name doesn't fit
         self._screen.text("Bin full in " + str(percentage) + "%", 0, 0)
-        self._screen.text(str(next_victim) + "is next", 0, 15)
-
+        self._screen.text(str(next_victim), 0, 15)
+        self._screen.text("is next", 0, 25)
         self._screen.show()
 
     def switch_to_lid_up_phase(self):
@@ -312,14 +372,33 @@ class ScreenHandler:
 
         self._screen.show()
 
-    def switch_to_select_user_phase(self, displayed_user):
-        self._phase = SELECT_USER_PHASE
-        self._screen.text("Select who took out the trash", 0, 0)
-        self._screen.text(displayed_user, 0, 10)
+    def switch_to_sync_phase(self):
+        self._phase = SYNCING_PHASE
+        self._screen.fill(0)
 
-    def change_user(self, next_victim):
+        self._screen.text("Sync in progress", 10, 20)
+
+        self._screen.show()
+
+    def switch_to_select_user_phase(self, displayed_user, points):
+        self._phase = SELECT_USER_PHASE
+        self._screen.fill(0)
+
         self._screen.text("Select who took out the trash", 0, 0)
-        self._screen.text(str(next_victim), 0, 10)
+        self._screen.text(str(displayed_user), 0, 10)
+        self._screen.text("with " + str(points) + "points", 0, 20)
+
+        self._screen.show()
+
+    def change_displayed_user(self, displayed_user, points):
+        self._screen.fill(0)
+
+        self._screen.text("Select who took out the trash", 0, 0)
+
+        self._screen.text(str(displayed_user), 0, 10)
+        self._screen.text("with " + str(points) + "points", 0, 20)
+
+        self._screen.show()
 
 
 class InputHandler:
@@ -336,7 +415,9 @@ class InputHandler:
 
         # stores previous reading from ultrasonic sensor
         self._current_distance_reading = 0
-        self._current_distance_reading_time = time.time()
+        self._current_distance_reading_time = (
+            time.time_ns() // 1000000
+        )  # value in miliseconds
         self._registered_distance = None
 
     @property
@@ -385,14 +466,15 @@ class InputHandler:
 
     def update_ultrasonic_sensor(self, read_distance):
         if self._registered_distance is None:
-            print("first run")
             self._registered_distance = read_distance
             self._bin_status_handler.distance_value_changed(read_distance)
             return
 
+        current_time_in_ms = time.time_ns() // 1000000
+
         current_distance_delta = abs(read_distance - self._current_distance_reading)
         registered_value_distance_delta = abs(read_distance - self._registered_distance)
-        time_delta = time.time() - self._current_distance_reading_time
+        time_delta = current_time_in_ms - self._current_distance_reading_time
 
         if current_distance_delta <= ULTRASONIC_SENSOR_TOLERANCE:
             if (time_delta >= MIN_READING_TIME) and (
@@ -404,7 +486,7 @@ class InputHandler:
                 self._bin_status_handler.distance_value_changed(read_distance)
         else:
             # wartość analizowanego odczytu się zmieniłą
-            self._current_distance_reading_time = time.time()
+            self._current_distance_reading_time = current_time_in_ms
             self._current_distance_reading = read_distance
 
     def update(self, joystick_x, joystick_y, distance):
@@ -412,13 +494,10 @@ class InputHandler:
         in bin_status_controller"""
 
         self.update_ultrasonic_sensor(distance)
-        # @TODO check if provided distance works
         self.update_joystick(joystick_x, joystick_y, distance=self._registered_distance)
 
 
 def main():
-    # saving moment(time) of start of program
-    start_time = time.time()
     # ports declaration
     JOYSTICK_X = 34
     JOYSTICK_Y = 35
@@ -444,6 +523,7 @@ def main():
     sensor = HCSR04(trigger_pin=5, echo_pin=18, echo_timeout_us=10000)
 
     # initializing handlers
+    memory_handler = MemoryHandler()
     server_connectivity_hanlder = ServerConnectivityHandler()
     screen_handler = ScreenHandler(
         screen=oled, screen_height=oled_height, screen_width=oled_width
@@ -451,6 +531,7 @@ def main():
     bin_status_handler = BinStatusHandler(
         screen_handler=screen_handler,
         server_connectivity_hanlder=server_connectivity_hanlder,
+        memory_handler=memory_handler,
     )
     input_handler = InputHandler(bin_status_handler=bin_status_handler)
 
@@ -462,16 +543,6 @@ def main():
 
         input_handler.update(joystick_x=sx, joystick_y=sy, distance=sd)
         screen_handler.update()
-
-        # oled.fill(0)
-        # oled.text(str(sd), 0, 0)
-        # oled.text(("start: " + str(start_time)), 0, 10)
-        # oled.text(("now: " + str(time_passed)), 0, 20)
-        # # oled.text(sx, 0, 0)
-        # # oled.text(sy, 0, 10)
-        # # oled.text(sd, 0, 20)
-
-        # oled.show()
 
 
 if __name__ == "__main__":

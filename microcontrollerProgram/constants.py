@@ -19,8 +19,8 @@ JOYSTICK_MOVED_DOWN = 40
 
 # ultrasonic sensor
 ULTRASONIC_SENSOR_TOLERANCE = 5  # in cm ; due to uncertainity of measurements
-MIN_READING_TIME = 1
-# time in seconds how long sygnal should be present, to be registered
+MIN_READING_TIME = 750
+# time in miliseconds how long sygnal should be present, to be registered
 
 # how full bin should be, to register act of taking out trash
 PERCENTAGE_TO_REGISTER_TAKING_OUT = 50
