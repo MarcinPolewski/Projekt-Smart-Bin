@@ -178,7 +178,10 @@ def takeoutApi(request, id=0):
         current_date = datetime.now()
         date_string = current_date.strftime("%Y-%m-%d %H:%M:%S")
         takeout_data.update({"date": date_string})
-        add_points = int(takeout_data.get("add_points"))
+        bin = TblKoszeKonfiguracyjna.objects.get(id_bin = 1)
+        bin_data = TblKoszeKonfiguracyjnaSerializer(bin).data
+
+        add_points = int(bin_data['adding_points'])
         add_points_user = TblUzytkownicyKonfig.objects.get(
             id_user=takeout_data["who_did"]
         )
@@ -187,7 +190,7 @@ def takeoutApi(request, id=0):
             sub_points_user = TblUzytkownicyKonfig.objects.get(
                 id_user=takeout_data["who_should"]
             )
-            sub_points = int(takeout_data.get("sub_points"))
+            sub_points = int(bin_data['subtrack_points'])
         user_serializer = TblUzytkownicyKonfigSerializer(add_points_user)
         user_data = user_serializer.data
         current_user_points = user_data["points_status"]
