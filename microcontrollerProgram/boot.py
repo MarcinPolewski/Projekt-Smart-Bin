@@ -1,6 +1,7 @@
 from machine import Pin, ADC, SoftI2C
 from hcsr04 import HCSR04
 import ssd1306
+import network
 
 import time
 
@@ -25,6 +26,11 @@ from constants import (
 )
 
 from memoryHandler import MemoryHandler
+
+
+class WiFiConnectionError(Exception):
+    def __inti__(self):
+        super.__init__("establishing wi-fi connection unsuccessful")
 
 
 class User:
@@ -56,10 +62,43 @@ class ServerConnectivityHandler:
     # @TODO
     def __init__(self):
         self._is_wifi_connected = False
+        self._station = network.WLAN(network.STA_IF)
         pass
 
-    def connect_to_internet(self):
-        pass
+    def connect_to_wifi(self):
+        print("connecting...")
+        wifi_name = "Galaxy"
+        wifi_password = "politechnikagorom"
+
+        self._station.active(False)
+        self._station.active(True)
+        self._station.connect(wifi_name, wifi_password)
+        time.sleep(10)
+
+        if not self._station.isconnected():
+            raise WiFiConnectionError
+
+        if self._station.isconnected():
+            print("connected")
+        else:
+            print("connection unsuccessfull")
+
+    def is_wifi_connected(self):
+        return self._station.isconnected()
+
+    def handle_connection(self):
+        """method tries to connect to wi-fi, return true if connection is on"""
+        if self.is_wifi_connected():
+            return True
+        else:
+            try:
+                self.connect_to_wifi()
+                return True
+            except WiFiConnectionError:
+                # @TODO save logs to database for later update?
+                print("connection unsuccessful")
+
+        return False
 
     def upload_fullness_percentage(self, depth):
         """sends current depth detected to server"""
@@ -68,9 +107,14 @@ class ServerConnectivityHandler:
 
     def send_log_to_server(self, who_took_out, who_should_have):
         """sends info, when somebody took out the trash"""
-        print("trash out! shoud: " + str(who_should_have) + " did " + str(who_took_out))
-        time.sleep(0.5)
-        pass
+        if self.handle_connection():
+            print(
+                "trash out! shoud: "
+                + str(who_should_have)
+                + " did "
+                + str(who_took_out)
+            )
+            time.sleep(0.5)
 
     def process_users(self, users):
         users_classes = []
@@ -85,19 +129,23 @@ class ServerConnectivityHandler:
         return users_classes
 
     def fetch_users_from_server(self):
-        users = [
-            {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
-            {"user_id": 7465, "user_name": "Jarek Darek", "points_status": 10},
-            {"user_id": 4321, "user_name": "Jurek Ogorek", "points_status": 2},
-            {"user_id": 1234, "user_name": "Jacek Wacek", "points_status": 5},
-        ]
-        users = self.process_users(users)
-        time.sleep(0.5)
+        users = []
+        if self.handle_connection():
+            users = [
+                {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
+                {"user_id": 7465, "user_name": "Jarek Darek", "points_status": 10},
+                {"user_id": 4321, "user_name": "Jurek Ogorek", "points_status": 2},
+                {"user_id": 1234, "user_name": "Jacek Wacek", "points_status": 5},
+            ]
+            users = self.process_users(users)
+            time.sleep(0.5)
         return users
 
     def fetch_bin_data(self):
-        data = {"bin_name": "THE bin"}
-        time.sleep(0.5)
+        data = {}
+        if self.handle_connection():
+            data = {"bin_name": "THE bin"}
+            time.sleep(0.5)
         return data
 
     def fetch_bin_name(self):
