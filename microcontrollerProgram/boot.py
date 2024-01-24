@@ -65,7 +65,7 @@ class ServerConnectivityHandler:
         self._bin_id = 1
         self._is_wifi_connected = False
         self._station = network.WLAN(network.STA_IF)
-        self._server_link = "http://127.0.0.1:8000"
+        self._server_link = "http://127.0.0.1:8000/"
         pass
 
     def connect_to_wifi(self):
@@ -108,7 +108,7 @@ class ServerConnectivityHandler:
         """sends current depth detected to server"""
         data = {"date_log": "", "bin_id": self._bin_id, "bin_status": percentage}
         link = self._server_link + "api/logs/"
-        urequests.post(link, data)
+        urequests.post(link, data).json()
         time.sleep(0.5)
         pass
 
@@ -125,7 +125,7 @@ class ServerConnectivityHandler:
         }
         link = self._server_link + "api/takout/"
         if self.handle_connection():
-            urequests.post(link, data)
+            urequests.post(link, data).json()
             # print(
             #     "trash out! shoud: "
             #     + str(who_should_have)
@@ -151,7 +151,7 @@ class ServerConnectivityHandler:
 
         if self.handle_connection():
             print("4")
-            users = urequests.get(link)
+            users = urequests.get(link).json()
             print("5")
             # users = [
             #     {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
