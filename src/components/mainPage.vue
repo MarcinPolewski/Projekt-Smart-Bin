@@ -29,7 +29,7 @@
                     <h2>Uwaga!</h2>
                     <a>Kosz nie został wyniesiony od {{ whenEmptied }}</a>
                     <a>Dostaniesz {{ pointsToAdd }} pkt za wyniesienie</a>
-                    <a>Za każde 12h zabierzemy ci {{ pointsToRemove }} pkt</a>
+                    <a>Za każde niewyniesienie zabierzemy ci {{ pointsToRemove }} pkt</a>
                 </div>
             </div>
         </div>
