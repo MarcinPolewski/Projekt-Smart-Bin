@@ -26,12 +26,10 @@ def send_info(bin_id, who_did):
             who_did_name= user['user_name']
     content = f'The trash in {bin_name} has been taken out by {who_did_name}.'
     for user in users_serializer.data:
-        print(user['which_bin'])
+
         mail = user['user_mail']
         recipents_list.append(mail)
-        print(content)
-        print(mail)
-        print(our_mail)
+
     send_mail("Trash taken out", content, our_mail, recipents_list, fail_silently = False)
 
 
@@ -98,7 +96,7 @@ def logsApi(request, id=0):
         user_serializer = TblBinLogsSerializer(user, many=True)
         return JsonResponse(user_serializer.data, safe=False)
     elif request.method == "POST":
-        print(request)
+
         user_data = request.POST.dict()
         try:
             user_data = JSONParser().parse(request)
@@ -208,11 +206,11 @@ def takeoutApi(request, id=0):
             sub_serializer_new = TblUzytkownicyKonfigSerializer(
                 sub_points_user, data=sub_data
             )
-            print(sub_data)
+
             if sub_serializer_new.is_valid():
                 sub_serializer_new.save()
         takeout_serializer = TblWynoszenieSerializer(data=takeout_data)
-        print(takeout_data)
+
         send_info(takeout_data['which_bin'], takeout_data['who_did'])
         if takeout_serializer.is_valid():
             takeout_serializer.save()
