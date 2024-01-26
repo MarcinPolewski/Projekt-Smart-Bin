@@ -70,7 +70,7 @@ class ServerConnectivityHandler:
         pass
 
     def connect_to_wifi(self):
-        print("connecting...")
+        # print("connecting...")
         wifi_name = "AndroidAPbd0b"
         wifi_password = "mwth1802"
 
@@ -82,10 +82,10 @@ class ServerConnectivityHandler:
         if not self._station.isconnected():
             raise WiFiConnectionError
 
-        if self._station.isconnected():
-            print("connected")
-        else:
-            print("connection unsuccessfull")
+        # if self._station.isconnected():
+        #     # print("connected")
+        # else:
+        #     # print("connection unsuccessfull")
 
     def is_wifi_connected(self):
         return self._station.isconnected()
@@ -100,24 +100,25 @@ class ServerConnectivityHandler:
                 return True
             except WiFiConnectionError:
                 # @TODO save logs to database for later update?
-                print("connection unsuccessful")
+                # print("connection unsuccessful")
+                pass
 
         return False
 
-    def upload_fullness_percentage(self, percentage):
+    def upload_current_depth(self, current_depth):
         """sends current depth to server"""
         if self.handle_connection():
-            data = {"date_log": "", "bin_id": self._bin_id, "bin_status": percentage}
+            data = {"date_log": "", "bin_id": self._bin_id, "bin_status": current_depth}
             json_data = ujson.dumps(data)
             link = self._server_link + "logs/"
             urequests.post(link, data=json_data).json()
             time.sleep(0.5)
-            print("percentage sent!: " + str(percentage))
+            # print("current depth sent!: " + str(current_depth))
 
     def send_log_to_server(self, who_took_out, who_should_have):
         """sends info, when somebody took out the trash"""
         if self.handle_connection():
-            print("sending log..")
+            # print("sending log..")
             data = {
                 "id_empty": 1,
                 "which_bin": self._bin_id,
@@ -127,14 +128,14 @@ class ServerConnectivityHandler:
                 "add_points": 1,
                 "sub_points": 1,
             }
-            print(data)
+            # print(data)
             json_data = ujson.dumps(data)
             link = self._server_link + "takeout/"
-            print(link)
-            print(data)
+            # print(link)
+            # print(data)
             urequests.post(link, data=json_data).json()
             time.sleep(0.5)
-            print("log sent!")
+            # print("log sent!")
 
     def process_users(self, users):
         user_classes = []
@@ -152,35 +153,43 @@ class ServerConnectivityHandler:
         link = self._server_link + "users/"
 
         if self.handle_connection():
-            print("4")
-            print(link)
-            a = urequests.get(link)
-            print("a: " + str(a))
-            print("a - text" + str(a.text))
             users = urequests.get(link).json()
-            print("5")
             # users = [
             #     {"user_id": 5344, "user_name": "Julka Gorka", "points_status": 100},
             #     {"user_id": 7465, "user_name": "Jarek Darek", "points_status": 10},
             #     {"user_id": 4321, "user_name": "Jurek Ogorek", "points_status": 2},
             #     {"user_id": 1234, "user_name": "Jacek Wacek", "points_status": 5},
             # ]
-            print("fetched!")
+            # print("users fetched!")
             users = self.process_users(users)
             time.sleep(0.5)
         return users
 
-    def fetch_bin_data(self):
-        data = {}
+    def send_bin_configuration_to_server(self, base_depth):
         if self.handle_connection():
-            data = {"bin_name": "THE bin"}
-            time.sleep(0.5)
-        return data
+            # print("startttt")
+            link = self._server_link + "bins/"
+            # data = urequests.get(link).json()
+            # # print("bin data fetched!")
+            # # print(data)
+            # data[0]["bin_depth"] = str(int(base_depth))
+            # # print(data)
 
-    def fetch_bin_name(self):
-        data = self.fetch_bin_data()
-        time.sleep(0.5)
-        return data["bin_name"]
+            data = {
+                "bin_name": "kosz pod zlewem",
+                "emp_calendar": 0,
+                "bin_depth": str(int(base_depth)),
+                "id_bin": 1,
+                "emp_reminder": 3,
+                "adding_points": 12,
+                "subtrack_points": 17,
+                "bin_status": "100",
+            }
+
+            json_data = ujson.dumps(data)
+            headers = {"Content-type": "application/json"}
+            urequests.put(link, data=json_data, headers=headers)
+            # print("config sent!")
 
 
 class BinStatusHandler:
@@ -239,11 +248,12 @@ class BinStatusHandler:
             self._displayed_user, points=self._displayed_user.points_status
         )
 
-    def sync_percentage(self, percentage):
+    def sync_current_depth(self):
         self._phase = SYNCING_PHASE
         self._screen_handler.switch_to_sync_phase()
-        percentage = self.get_bin_fullness_percentage()
-        self._server_handler.upload_fullness_percentage(percentage)
+        self._server_handler.upload_current_depth(
+            self._base_depth - self._current_depth
+        )
 
     def exit_lid_up_phase(self, new_distance_value):
         """method triggered when user exits lid up phases"""
@@ -256,7 +266,7 @@ class BinStatusHandler:
         else:
             # bin has not been emptied
             self._current_depth = new_distance_value
-            self.sync_percentage(self.get_bin_fullness_percentage())
+            self.sync_current_depth()
 
             self._phase = MAIN_PHASE
 
@@ -267,12 +277,13 @@ class BinStatusHandler:
 
     def distance_value_changed(self, new_value):
         """method called when distance sensor has detected a change"""
+        # print("registered new distance value =" + str(new_value))
         if self._phase == START_PHASE:
+            # print("not registstered due to start phase")
             return
 
         self._phase = LID_UP_PHASE
         self._screen_handler.switch_to_lid_up_phase()
-        print("registered new distance value =" + str(new_value))
 
     def switch_displayed_user(self, to_the_left):
         """switching displayed user during selecting user phase"""
@@ -313,7 +324,7 @@ class BinStatusHandler:
             who_took_out=self._displayed_user.user_id,
             who_should_have=self._designated_user.user_id,
         )
-        self.sync_percentage(self.get_bin_fullness_percentage())
+        self.sync_current_depth()
         self.fetch_users_from_server()
 
         self.update_next_designated_user()
@@ -342,8 +353,7 @@ class BinStatusHandler:
         self._phase = SYNCING_PHASE
         self._screen_handler.switch_to_sync_phase()
 
-        percentage = self.get_bin_fullness_percentage()
-        self._server_handler.upload_fullness_percentage(percentage)
+        self.sync_current_depth()
         self.fetch_users_from_server()
         self.update_next_designated_user()
 
@@ -352,6 +362,7 @@ class BinStatusHandler:
             next_victim=self._designated_user,
             percentage=self.get_bin_fullness_percentage(),
         )
+        # print("switched to main")
 
     def handle_interaction_main_phase(self, event_type, distance):
         pass
@@ -390,12 +401,10 @@ class BinStatusHandler:
         self._base_depth = distance
         self._current_depth = distance
 
-        # fetching bin name
+        # sending configuration to server
         self._phase = SYNCING_PHASE
         self._screen_handler.switch_to_sync_phase()
-
-        bin_name = self._server_handler.fetch_bin_name()
-        self._bin_name = bin_name
+        self._server_handler.send_bin_configuration_to_server(self._base_depth)
 
         # saving configuration to file
         data = {"bin_name": self._bin_name, "base_depth": self._base_depth}
@@ -443,8 +452,8 @@ class ScreenHandler:
 
         # @TODO - hadnle when name doesn't fit
         self._screen.text("Bin full in " + str(percentage) + "%", 0, 0)
-        self._screen.text(str(next_victim), 0, 15)
-        self._screen.text("is next", 0, 25)
+        self._screen.text(str(next_victim), 0, 25)
+        self._screen.text("is next", 0, 35)
         self._screen.show()
 
     def switch_to_lid_up_phase(self):
@@ -462,8 +471,8 @@ class ScreenHandler:
         self._phase = SYNCING_PHASE
         self._screen.fill(0)
 
-        self._screen.text("Sync in progress", 10, 20)
-
+        self._screen.text("Sync in", 20, 20)
+        self._screen.text("progress..", 20, 30)
         self._screen.show()
 
     def switch_to_select_user_phase(self, displayed_user, points):
@@ -471,8 +480,9 @@ class ScreenHandler:
         self._screen.fill(0)
 
         self._screen.text("Select who took out the trash", 0, 0)
-        self._screen.text(str(displayed_user), 0, 10)
-        self._screen.text("with " + str(points) + "points", 0, 20)
+        self._screen.text("out the trash:", 0, 10)
+        self._screen.text(str(displayed_user), 0, 25)
+        self._screen.text("with " + str(points) + "points", 0, 35)
 
         self._screen.show()
 
@@ -480,9 +490,9 @@ class ScreenHandler:
         self._screen.fill(0)
 
         self._screen.text("Select who took out the trash", 0, 0)
-
-        self._screen.text(str(displayed_user), 0, 10)
-        self._screen.text("with " + str(points) + "points", 0, 20)
+        self._screen.text("out the trash:", 0, 10)
+        self._screen.text(str(displayed_user), 0, 25)
+        self._screen.text("with " + str(points) + "points", 0, 35)
 
         self._screen.show()
 
@@ -551,6 +561,7 @@ class InputHandler:
             self._joystick_up = False
 
     def update_ultrasonic_sensor(self, read_distance):
+        # print(read_distance)
         if self._registered_distance is None:
             self._registered_distance = read_distance
             self._bin_status_handler.distance_value_changed(read_distance)
