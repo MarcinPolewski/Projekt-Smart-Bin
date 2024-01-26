@@ -3,6 +3,7 @@ from hcsr04 import HCSR04
 import ssd1306
 import network
 import urequests
+import ujson
 
 import time
 
@@ -104,37 +105,36 @@ class ServerConnectivityHandler:
         return False
 
     def upload_fullness_percentage(self, percentage):
-        print("1")
-        """sends current depth detected to server"""
-        data = {"date_log": "", "bin_id": self._bin_id, "bin_status": percentage}
-        print("data: " + str(data))
-        print("%: " + str(percentage))
-        link = self._server_link + "logs/"
-        urequests.post(link, data=data).json()
-        time.sleep(0.5)
-        pass
+        """sends current depth to server"""
+        if self.handle_connection():
+            data = {"date_log": "", "bin_id": self._bin_id, "bin_status": percentage}
+            json_data = ujson.dumps(data)
+            link = self._server_link + "logs/"
+            urequests.post(link, data=json_data).json()
+            time.sleep(0.5)
+            print("percentage sent!: " + str(percentage))
 
     def send_log_to_server(self, who_took_out, who_should_have):
         """sends info, when somebody took out the trash"""
-        data = {
-            "id_empty": 1,
-            "which_bin": self._bin_id,
-            "who_should": who_should_have,
-            "who_did": who_took_out,
-            "date": "2020",
-            "add_points": 1,
-            "sub_points": 1,
-        }
-        link = self._server_link + "takout/"
         if self.handle_connection():
-            urequests.post(link, data).json()
-            # print(
-            #     "trash out! shoud: "
-            #     + str(who_should_have)
-            #     + " did "
-            #     + str(who_took_out)
-            # )
+            print("sending log..")
+            data = {
+                "id_empty": 1,
+                "which_bin": self._bin_id,
+                "who_should": who_should_have,
+                "who_did": who_took_out,
+                "date": "2020",
+                "add_points": 1,
+                "sub_points": 1,
+            }
+            print(data)
+            json_data = ujson.dumps(data)
+            link = self._server_link + "takeout/"
+            print(link)
+            print(data)
+            urequests.post(link, data=json_data).json()
             time.sleep(0.5)
+            print("log sent!")
 
     def process_users(self, users):
         user_classes = []
@@ -239,6 +239,12 @@ class BinStatusHandler:
             self._displayed_user, points=self._displayed_user.points_status
         )
 
+    def sync_percentage(self, percentage):
+        self._phase = SYNCING_PHASE
+        self._screen_handler.switch_to_sync_phase()
+        percentage = self.get_bin_fullness_percentage()
+        self._server_handler.upload_fullness_percentage(percentage)
+
     def exit_lid_up_phase(self, new_distance_value):
         """method triggered when user exits lid up phases"""
 
@@ -246,19 +252,18 @@ class BinStatusHandler:
             # bin has been emptied
             self.switch_to_select_user()
             self._current_depth = self._base_depth
+
         else:
             # bin has not been emptied
-            self._phase = MAIN_PHASE
             self._current_depth = new_distance_value
+            self.sync_percentage(self.get_bin_fullness_percentage())
+
+            self._phase = MAIN_PHASE
 
             next_user = str(self._designated_user)
             self._screen_handler.switch_to_main_phase(
                 next_user, self.get_bin_fullness_percentage()
             )
-
-        # sending current status of bin
-        percentage = self.get_bin_fullness_percentage()
-        self._server_handler.upload_fullness_percentage(percentage)
 
     def distance_value_changed(self, new_value):
         """method called when distance sensor has detected a change"""
@@ -276,7 +281,7 @@ class BinStatusHandler:
             if self._displayed_user_idx < 0:
                 self._displayed_user_idx = len(self._users) - 1
 
-            next_victim = self._users[self._designated_user_idx]
+            next_victim = self._users[self._displayed_user_idx]
 
             self._displayed_user = next_victim
             self._screen_handler.change_displayed_user(
@@ -305,11 +310,12 @@ class BinStatusHandler:
         self._screen_handler.switch_to_sync_phase()
 
         self._server_handler.send_log_to_server(
-            who_took_out=self._displayed_user, who_should_have=self._designated_user
+            who_took_out=self._displayed_user.user_id,
+            who_should_have=self._designated_user.user_id,
         )
+        self.sync_percentage(self.get_bin_fullness_percentage())
         self.fetch_users_from_server()
 
-        self._displayed_user.add_point()
         self.update_next_designated_user()
 
         # after sync is completed phase will autoamtially change
@@ -336,6 +342,8 @@ class BinStatusHandler:
         self._phase = SYNCING_PHASE
         self._screen_handler.switch_to_sync_phase()
 
+        percentage = self.get_bin_fullness_percentage()
+        self._server_handler.upload_fullness_percentage(percentage)
         self.fetch_users_from_server()
         self.update_next_designated_user()
 
