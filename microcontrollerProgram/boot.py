@@ -65,13 +65,13 @@ class ServerConnectivityHandler:
         self._bin_id = 1
         self._is_wifi_connected = False
         self._station = network.WLAN(network.STA_IF)
-        self._server_link = "http://127.0.0.1:8000/"
+        self._server_link = "http://79.185.97.58:8001/"
         pass
 
     def connect_to_wifi(self):
         print("connecting...")
-        wifi_name = "Galaxy"
-        wifi_password = "politechnikagorom"
+        wifi_name = "AndroidAPbd0b"
+        wifi_password = "mwth1802"
 
         self._station.active(False)
         self._station.active(True)
@@ -107,8 +107,10 @@ class ServerConnectivityHandler:
         print("1")
         """sends current depth detected to server"""
         data = {"date_log": "", "bin_id": self._bin_id, "bin_status": percentage}
-        link = self._server_link + "api/logs/"
-        urequests.post(link, data).json()
+        print("data: " + str(data))
+        print("%: " + str(percentage))
+        link = self._server_link + "logs/"
+        urequests.post(link, data=data).json()
         time.sleep(0.5)
         pass
 
@@ -123,7 +125,7 @@ class ServerConnectivityHandler:
             "add_points": 1,
             "sub_points": 1,
         }
-        link = self._server_link + "api/takout/"
+        link = self._server_link + "takout/"
         if self.handle_connection():
             urequests.post(link, data).json()
             # print(
@@ -147,10 +149,14 @@ class ServerConnectivityHandler:
 
     def fetch_users_from_server(self):
         users = []
-        link = self._server_link + "api/users/"
+        link = self._server_link + "users/"
 
         if self.handle_connection():
             print("4")
+            print(link)
+            a = urequests.get(link)
+            print("a: " + str(a))
+            print("a - text" + str(a.text))
             users = urequests.get(link).json()
             print("5")
             # users = [
