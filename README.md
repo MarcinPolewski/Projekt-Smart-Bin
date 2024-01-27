@@ -57,9 +57,11 @@ Całość została stworzona z myślą o łatwej rozbudowie w przyszłości. Mod
 Backend został zrobiony w django rest framework. Pozwala nam na komunikację pomiędzy bazą danych, płytką i stroną. Udostępnia dane w formacie JSON.
 
 ### Struktura Plików
-Najważniejsze pliki w projekcie to 
+Najważniejsze pliki w projekcie to
 models.py - plik w którym znajdują się klasy odpowiadające tabelom z bazy danych.
 serializers.py - plik w którym znajdują się serializatory danych z modeli
 views.py - plik w którym wykorzystywane są modele i serializatory do obsługi zapytań do api i logiki
 
- 
+### Funkcjonalność
+Backend, oprócz swojej bazowej funkcjonalności pozwala też na wysyłanie maili użytkownikom po każdym wyniesieniu kosza. Dodaje też akutalne daty do tabel w bazie danych, żeby zminimalizować ilość zadań jakie musi wykonywać płytka. Można z nim "rozmawiać" poprzez klasyczne pythonowe requesty, ale też przeglądać dane po wpisaniu {url strony}:8001 w przeglądarke.
+
