@@ -65,10 +65,10 @@ views.py - plik w którym wykorzystywane są modele i serializatory do obsługi 
 ### Funkcjonalność
 Backend, oprócz swojej bazowej funkcjonalności pozwala też na wysyłanie maili użytkownikom po każdym wyniesieniu kosza. Dodaje też akutalne daty do tabel w bazie danych, żeby zminimalizować ilość zadań jakie musi wykonywać płytka. Można z nim "rozmawiać" poprzez klasyczne pythonowe requesty, ale też przeglądać dane po wpisaniu {url strony}:8001 w przeglądarke.
 
-## Serwer HTTPS na Linux Mint z Nginx (Vue) i Daphne (Django)
+## Serwer HTTP na Linux Mint z Nginx (Vue) i Daphne (Django)
 ### Opis Projektu
 
-Projekt obejmuje implementację serwera HTTPS na systemie Linux Mint, z dwiema głównymi częściami: front-end obsługiwany przez Nginx z frameworkiem Vue, oraz back-end obsługiwany przez Daphne z frameworkiem Django.
+Projekt obejmuje implementację serwera HTTP na systemie Linux Mint, z dwiema głównymi częściami: front-end obsługiwany przez Nginx z frameworkiem Vue, oraz back-end obsługiwany przez Daphne z frameworkiem Django.
 ### Komponenty Projektu
 1. Front-end (Nginx + Vue)
 
@@ -82,7 +82,7 @@ Projekt obejmuje implementację serwera HTTPS na systemie Linux Mint, z dwiema g
 
     Django: Framework webowy oparty na języku Python. Obsługuje zapytania od Daphne, stanowiąc warstwę back-end projektu.
 
-### Implementacja HTTPS na Linux Mint
+### Implementacja HTTP na Linux Mint
 1. Nginx (Vue)
 
     Instalacja Nginx na Linux Mint: Nginx został zainstalowany na systemie Linux Mint przy użyciu menedżera pakietów. Konfiguracja Nginx obejmuje obsługę ruchu na porcie 8001 oraz przekierowanie na aplikację Vue.
@@ -101,4 +101,4 @@ Struktura projektu jest zorganizowana w sposób umożliwiający łatwe zarządza
 Po skonfigurowaniu HTTP, należy regularnie monitorować dostępność obu części projektu. Testowanie powinno obejmować zarówno część front-end, jak i back-end, aby upewnić się, że obie funkcje są dostępne i działają zgodnie z oczekiwaniami.
 ### Zakończenie
 
-Dokumentacja informacyjna zawiera podstawowe informacje dotyczące projektu, opisując główne komponenty, sposób implementacji HTTPS na systemie Linux Mint, oraz strukturę projektu.
+Dokumentacja informacyjna zawiera podstawowe informacje dotyczące projektu, opisując główne komponenty, sposób implementacji HTTP na systemie Linux Mint, oraz strukturę projektu.
