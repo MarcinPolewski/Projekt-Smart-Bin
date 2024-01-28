@@ -74,7 +74,7 @@ Projekt obejmuje implementację serwera HTTPS na systemie Linux Mint, z dwiema g
 
     Nginx: Jeden z najpopularniejszych serwerów HTTP, pełniący rolę reverse proxy. Zainstalowany na systemie Linux Mint, konfigurowany jako interfejs pomiędzy zewnętrznymi zapytaniami HTTP a serwerem Vue.
 
-    Vue: Framework JavaScript do budowania interfejsów użytkownika. Działa na porcie 8000 i jest odpowiedzialny za obsługę warstwy front-end.
+    Vue: Framework JavaScript do budowania interfejsów użytkownika. Działa na porcie 8001 i jest odpowiedzialny za obsługę warstwy front-end.
 
 2. Back-end (Daphne + Django)
 
@@ -82,12 +82,10 @@ Projekt obejmuje implementację serwera HTTPS na systemie Linux Mint, z dwiema g
 
     Django: Framework webowy oparty na języku Python. Obsługuje zapytania od Daphne, stanowiąc warstwę back-end projektu.
 
-## Implementacja HTTPS na Linux Mint
+### Implementacja HTTPS na Linux Mint
 1. Nginx (Vue)
 
     Instalacja Nginx na Linux Mint: Nginx został zainstalowany na systemie Linux Mint przy użyciu menedżera pakietów. Konfiguracja Nginx obejmuje obsługę ruchu na porcie 8001 oraz przekierowanie na aplikację Vue.
-
-    Konfiguracja Nginx z SSL: Certyfikat SSL uzyskano za pomocą Certbota, umożliwiając obsługę zabezpieczonego połączenia HTTPS na Linux Mint.
 
 2. Daphne (Django)
 
@@ -95,12 +93,12 @@ Projekt obejmuje implementację serwera HTTPS na systemie Linux Mint, z dwiema g
 
     Konfiguracja Daphne: Skonfigurowano Daphne do obsługi aplikacji Django, a Nginx został skonfigurowany jako reverse proxy, przekierowując zapytania na port socketa obsługiwanego przez Daphne.
 
-## Struktura Projektu
+### Struktura Projektu
 
 Struktura projektu jest zorganizowana w sposób umożliwiający łatwe zarządzanie i utrzymanie zarówno front-endu, jak i back-endu. Każda z części (Vue i Django) jest odseparowana, co ułatwia rozwijanie i skalowanie projektu.
-## Monitorowanie i Testowanie
+### Monitorowanie i Testowanie
 
-Po skonfigurowaniu HTTPS, należy regularnie monitorować dostępność obu części projektu. Testowanie powinno obejmować zarówno część front-end, jak i back-end, aby upewnić się, że obie funkcje są dostępne i działają zgodnie z oczekiwaniami.
-## Zakończenie
+Po skonfigurowaniu HTTP, należy regularnie monitorować dostępność obu części projektu. Testowanie powinno obejmować zarówno część front-end, jak i back-end, aby upewnić się, że obie funkcje są dostępne i działają zgodnie z oczekiwaniami.
+### Zakończenie
 
-Dokumentacja informacyjna zawiera podstawowe informacje dotyczące projektu, opisując główne komponenty, sposób implementacji HTTPS na systemie Linux Mint, oraz strukturę projektu. Dla dokładnych instrukcji dotyczących instalacji i konfiguracji, proszę skonsultować się z dokumentacją instruktażową projektu.
+Dokumentacja informacyjna zawiera podstawowe informacje dotyczące projektu, opisując główne komponenty, sposób implementacji HTTPS na systemie Linux Mint, oraz strukturę projektu.
