@@ -53,6 +53,9 @@ Całość została stworzona z myślą o łatwej rozbudowie w przyszłości. Mod
 
 ## Backend
 
+### Uruchomienie
+trashAPI/ python manage.py runserver
+
 ### Wprowadzenie
 Backend został zrobiony w django rest framework. Pozwala nam na komunikację pomiędzy bazą danych, płytką i stroną. Udostępnia dane w formacie JSON.
 
