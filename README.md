@@ -1,107 +1,119 @@
-# Śmieci
 
-## Setup projektu
+# Trash
+
+## Project Setup
 ```
 npm install
 ```
 
-### Tryb developerski (tego używamy przy tworzeniu)
+### Development Mode (used during development)
 ```
 npm run serve
 ```
 
-### Build (to będzie stało na serwerze)
+### Build (to be hosted on the server)
 ```
 npm run build
 ```
 
-# Dokumentacja
+# Documentation
 
 ## Frontend
 
-### Wprowadzenie
+### Introduction
 
-Frontend naszej aplikacji został w pełni zrealizowany przy użyciu reaktywnego frameworku do JavaScripta - Vue.js. To zaawansowane narzędzie umożliwia tworzenie dynamicznych i interaktywnych interfejsów użytkownika. Nasza strona internetowa jest zoptymalizowana jako interfejs do obsługi naszego REST API, co pozwala na efektywną komunikację z serwerem. Strona jest responsywna - dostosowuje się zarówno do wielkości monitora komputera, jak i ekranu telefonu.
+The frontend of our application has been fully realized using the reactive JavaScript framework - Vue.js. This advanced tool enables the creation of dynamic and interactive user interfaces. Our website is optimized as an interface for managing our REST API, allowing efficient communication with the server. The site is responsive, adapting to both computer monitor sizes and mobile screens.
 
-### Struktura Projektu
+### Project Structure
 
-Projekt jest podzielony na widoki, które reprezentują logicznie wydzielone podstrony. Dostęp do poszczególnych widoków uzyskuje się poprzez wykorzystanie drzewa linków dostarczanego przez Vue Router.
+The project is divided into views that represent logically separated subpages. Access to individual views is obtained by using the link tree provided by Vue Router.
 
-Każdy komponent (widok) składa się z trzech głównych części:
+Each component (view) consists of three main parts:
 
-    HTML: Definiuje strukturę i układ elementów na stronie.
-    JavaScript (Vue.js): Odpowiada za logikę komponentu, interakcję z danymi i dynamiczną aktualizację interfejsu.
-    SCSS (kaskadowy arkusz stylów): Zawiera style, które definiują wygląd i układ komponentu.
+- HTML: Defines the structure and layout of elements on the page.
+- JavaScript (Vue.js): Responsible for the component's logic, data interaction, and dynamic interface updates.
+- SCSS (Cascading Style Sheets): Contains styles that define the appearance and layout of the component.
 
-### Struktura Plików
+### File Structure
 
-Najważniejszy folder zawierający frontend to /src. Zawiera on kluczowe elementy, takie jak:
+The most important folder containing the frontend is /src. It includes key elements such as:
 
-    Assety: Zasoby, takie jak obrazy, ikony, itp.
-    Komponenty: Moduły Vue.js, reprezentujące poszczególne części strony.
-    Czcionki: Folder zawierający używane czcionki.
-    Style: Arkusze stylów w formie plików SCSS.
-    Vue Router: Struktura drzewa linków do nawigacji między komponentami.
+- Assets: Resources such as images, icons, etc.
+- Components: Vue.js modules representing individual parts of the page.
+- Fonts: A folder containing the fonts used.
+- Styles: Stylesheets in the form of SCSS files.
+- Vue Router: The link tree structure for navigation between components.
 
-### Wersja Vue.js
+### Vue.js Version
 
-Frontend został zbudowany przy użyciu Vue.js w wersji 3.3.12. Wykorzystanie najnowszej wersji frameworku pozwala na korzystanie z najnowszych funkcji.
+The frontend was built using Vue.js version 3.3.12. Utilizing the latest version of the framework allows for the use of the latest features.
 
-### Rozbudowa Projektu
+### Project Expansion
 
-Całość została stworzona z myślą o łatwej rozbudowie w przyszłości. Modułowa struktura projektu i zastosowanie Vue.js jako frameworka reaktywnego ułatwiają dodawanie nowych funkcji i komponentów.
+The entire project was created with future expansion in mind. The modular project structure and the use of Vue.js as a reactive framework make it easier to add new features and components.
 
 ## Backend
 
-### Uruchomienie
+### Running
+```
 trashAPI/ python manage.py runserver
+```
 
-### Wprowadzenie
-Backend został zrobiony w django rest framework. Pozwala nam na komunikację pomiędzy bazą danych, płytką i stroną. Udostępnia dane w formacie JSON.
+### Introduction
+The backend was developed using Django Rest Framework. It allows communication between the database, the board, and the website. It provides data in JSON format.
 
-### Struktura Plików
-Najważniejsze pliki w projekcie to
-models.py - plik w którym znajdują się klasy odpowiadające tabelom z bazy danych.
-serializers.py - plik w którym znajdują się serializatory danych z modeli
-views.py - plik w którym wykorzystywane są modele i serializatory do obsługi zapytań do api i logiki
+### File Structure
+The most important files in the project are:
+- models.py - the file containing classes corresponding to the database tables.
+- serializers.py - the file containing the serializers for data from the models.
+- views.py - the file where models and serializers are used to handle API requests and logic.
 
-### Funkcjonalność
-Backend, oprócz swojej bazowej funkcjonalności pozwala też na wysyłanie maili użytkownikom po każdym wyniesieniu kosza. Dodaje też akutalne daty do tabel w bazie danych, żeby zminimalizować ilość zadań jakie musi wykonywać płytka. Można z nim "rozmawiać" poprzez klasyczne pythonowe requesty, ale też przeglądać dane po wpisaniu {url strony}:8001 w przeglądarke.
+### Functionality
+The backend, besides its basic functionality, also allows sending emails to users after each trash collection. It adds the current dates to the database tables to minimize the tasks that the board must perform. You can "talk" to it through classic Python requests, but you can also view data by entering {site url}:8001 in the browser.
 
-## Serwer HTTP na Linux Mint z Nginx (Vue) i Daphne (Django)
-### Opis Projektu
+## HTTP Server on Linux Mint with Nginx (Vue) and Daphne (Django)
+### Project Description
 
-Projekt obejmuje implementację serwera HTTP na systemie Linux Mint, z dwiema głównymi częściami: front-end obsługiwany przez Nginx z frameworkiem Vue, oraz back-end obsługiwany przez Daphne z frameworkiem Django.
-### Komponenty Projektu
-1. Front-end (Nginx + Vue)
+The project involves implementing an HTTP server on the Linux Mint operating system, with two main parts: the frontend served by Nginx with the Vue framework, and the backend served by Daphne with the Django framework.
 
-    Nginx: Jeden z najpopularniejszych serwerów HTTP, pełniący rolę reverse proxy. Zainstalowany na systemie Linux Mint, konfigurowany jako interfejs pomiędzy zewnętrznymi zapytaniami HTTP a serwerem Vue.
+### Project Components
+1. Frontend (Nginx + Vue)
 
-    Vue: Framework JavaScript do budowania interfejsów użytkownika. Działa na porcie 8001 i jest odpowiedzialny za obsługę warstwy front-end.
+    Nginx: One of the most popular HTTP servers, acting as a reverse proxy. Installed on the Linux Mint system, configured as an interface between external HTTP requests and the Vue server.
 
-2. Back-end (Daphne + Django)
+    Vue: A JavaScript framework for building user interfaces. It runs on port 8001 and is responsible for handling the frontend layer.
 
-    Daphne: Serwer HTTP dla aplikacji Django. Uruchamia się na porcie socketa, obsługując zapytania asynchronicznie.
+2. Backend (Daphne + Django)
 
-    Django: Framework webowy oparty na języku Python. Obsługuje zapytania od Daphne, stanowiąc warstwę back-end projektu.
+    Daphne: An HTTP server for Django applications. It runs on a socket port, handling requests asynchronously.
 
-### Implementacja HTTP na Linux Mint
+    Django: A web framework based on Python. It handles requests from Daphne, constituting the backend layer of the project.
+
+### HTTP Implementation on Linux Mint
 1. Nginx (Vue)
 
-    Instalacja Nginx na Linux Mint: Nginx został zainstalowany na systemie Linux Mint przy użyciu menedżera pakietów. Konfiguracja Nginx obejmuje obsługę ruchu na porcie 8001 oraz przekierowanie na aplikację Vue.
+    Installing Nginx on Linux Mint: Nginx was installed on the Linux Mint system using the package manager. The Nginx configuration includes handling traffic on port 8001 and redirecting to the Vue application.
 
 2. Daphne (Django)
 
-    Instalacja Daphne na Linux Mint: Daphne został zainstalowany jako serwer HTTP do obsługi aplikacji Django na systemie Linux Mint.
+    Installing Daphne on Linux Mint: Daphne was installed as an HTTP server to support Django applications on the Linux Mint system.
 
-    Konfiguracja Daphne: Skonfigurowano Daphne do obsługi aplikacji Django, a Nginx został skonfigurowany jako reverse proxy, przekierowując zapytania na port socketa obsługiwanego przez Daphne.
+    Configuring Daphne: Daphne was configured to handle the Django application, and Nginx was set up as a reverse proxy, redirecting requests to the socket port handled by Daphne.
 
-### Struktura Projektu
+### Project Structure
 
-Struktura projektu jest zorganizowana w sposób umożliwiający łatwe zarządzanie i utrzymanie zarówno front-endu, jak i back-endu. Każda z części (Vue i Django) jest odseparowana, co ułatwia rozwijanie i skalowanie projektu.
-### Monitorowanie i Testowanie
+The project structure is organized to allow easy management and maintenance of both the frontend and backend. Each part (Vue and Django) is separated, making it easier to develop and scale the project.
 
-Po skonfigurowaniu HTTP, należy regularnie monitorować dostępność obu części projektu. Testowanie powinno obejmować zarówno część front-end, jak i back-end, aby upewnić się, że obie funkcje są dostępne i działają zgodnie z oczekiwaniami.
-### Zakończenie
+### Monitoring and Testing
 
-Dokumentacja informacyjna zawiera podstawowe informacje dotyczące projektu, opisując główne komponenty, sposób implementacji HTTP na systemie Linux Mint, oraz strukturę projektu.
+After configuring HTTP, it is important to regularly monitor the availability of both parts of the project. Testing should include both the frontend and backend to ensure that both functions are available and working as expected.
+
+### Conclusion
+
+The informational documentation contains basic information about the project, describing the main components, the method of implementing HTTP on the Linux Mint system, and the project structure.
+
+### Photos from realization
+![demo1](photos_for_readme/demo1.jpeg)
+![demo2](photos_for_readme/demo2.jpeg)
+![demo3](photos_for_readme/demo3.jpeg)
+![demo4](photos_for_readme/demo4.jpeg)
